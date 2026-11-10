@@ -3,5 +3,7 @@ window.SCIOLY_SITE = {
   sbengagedUrl: 'https://sbengaged.stonybrook.edu/feeds?type=club&type_id=35876&tab=about',
   sbengagedLabel: 'Find us on SBEngaged',
   instagramUrl: 'https://www.instagram.com/stonybrookscioly/',
-  instagramLabel: '@stonybrookscioly'
+  instagramLabel: '@stonybrookscioly',
+  futureGbmIdeaUrl: 'https://docs.google.com/forms/d/e/1FAIpQLSdGWAcrimDFGn0bsX590xjr4VtjeAPH0udiQywrthr06P7GRw/viewform',
+  emailListUrl: 'https://tr.ee/_gXIvrv6Qf'
 };

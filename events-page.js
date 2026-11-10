@@ -55,6 +55,12 @@ function setSiteLink() {
     if (data.instagramUrl) link.href = data.instagramUrl;
     if (data.instagramLabel) link.textContent = `${data.instagramLabel} ↗`;
   });
+  document.querySelectorAll('[data-site-link="future-gbm-idea"]').forEach(link => {
+    if (data.futureGbmIdeaUrl) link.href = data.futureGbmIdeaUrl;
+  });
+  document.querySelectorAll('[data-site-link="email-list"]').forEach(link => {
+    if (data.emailListUrl) link.href = data.emailListUrl;
+  });
 }
 
 function renderUpcoming(event) {

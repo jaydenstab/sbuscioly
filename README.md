@@ -9,7 +9,7 @@ The site helps new and returning members find the weekly meeting schedule, curre
 ## Pages
 
 - **Home:** Club introduction, recurring meeting details, attendance information, and the next confirmed activity.
-- **Meetings:** Weekly schedule, directions, visitor information, activity updates, calendar links, and past flyers.
+- **Meetings:** Weekly schedule, directions, visitor information, activity updates, calendar links, past flyers, email list, and a future GBM idea form.
 - **Volunteering:** Tournament participation and verified updates.
 - **About:** Club overview, officers, approved meeting photos, and contact/social links.
 
@@ -43,7 +43,7 @@ Open <http://127.0.0.1:8000> to preview the site. The first command regenerates 
 | `data/volunteering.js` | Volunteer dates, verification state, and recap notes |
 | `data/officers.js` | Current officer names and approved profile details |
 | `data/photos.js` | Approved meeting photo gallery entries |
-| `data/site.js` | SBEngaged and Instagram destinations |
+| `data/site.js` | SBEngaged, Instagram, email list, and future GBM idea form destinations |
 | `*-page.js` and `script.js` | Page-specific rendering and shared navigation |
 | `tests/` | Python build/link checks and Node status regression tests |
 | `MAINTENANCE.md` | Officer instructions for updating the site |

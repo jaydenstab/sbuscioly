@@ -77,7 +77,7 @@ Edit `data/officers.js` with current officer names and roles. Use `name: 'Vacant
 
 ## Contact and social links
 
-Edit `data/site.js` for the club’s SBEngaged and Instagram links and labels. Use the exact public URLs. Email and other contact information in `about.html` should be kept current by an officer. Rebuild after changing data so the generated asset hashes are refreshed.
+Edit `data/site.js` for the club’s SBEngaged and Instagram links, the email list form, and the future GBM idea form. Use the current public URLs; the Meetings page reads those form destinations from this file. Email and other contact information in `about.html` should be kept current by an officer. Rebuild after changing data so the generated asset hashes are refreshed.
 
 ## Before publishing
 
