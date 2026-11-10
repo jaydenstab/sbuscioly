@@ -9,23 +9,21 @@ This is the updated source site. It uses plain HTML, CSS, and JavaScript (no npm
 3. Open `index.html` in your browser, or use the VS Code Live Server extension.
 4. Check the poster viewer, mobile navigation, volunteering status, and E-Board cards.
 
-## Important: finish the social-sharing URL
+## Live website
 
-In `index.html`, search for **`YOUR-GITHUB-ORG`**. Replace all occurrences with your actual GitHub Pages URL **before publishing**. These values are used by social networks when people share your link. For example, if your GitHub organization is `sbuscioly` and its repository is named `sbuscioly.github.io`, the home URL is `https://sbuscioly.github.io/` and the image URL is `https://sbuscioly.github.io/assets/social-preview.png`.
+https://sbuscioly.club/
 
-If your website uses a repository path or custom domain, use its **real complete address** instead. Do **not** invent or assume the organization name, domain or URL.
+This is the student-run SBU Science Olympiad website, hosted
+for free on GitHub Pages with a custom domain managed by Porkbun.
 
-The social preview image is in `assets/social-preview.png` and the favicon assets are in `assets/`.
+## Publishing updates
 
-## Publish or update GitHub Pages
+1. Edit and preview the website in VS Code.
+2. Commit your changes and push them to the main branch.
+3. Check GitHub Actions to confirm deployment succeeded.
+4. Visit https://sbuscioly.club/ to verify the updates.
 
-1. Use a club-managed GitHub organization with at least two trusted officers who have admin access.
-2. For an organization website, create a public repository named `<organization-name>.github.io`.
-3. Upload the **contents** of this folder to the repository root. That includes `index.html`, `styles.css`, `script.js`, `data/`, `posters/` and `assets/`.
-4. In GitHub, visit Settings → Pages → Build and deployment → Deploy from a branch, choose `main`, `/(root)`, then Save.
-5. Make sure the new deployment finishes and check the website in a private/incognito window.
-
-GitHub documentation: https://docs.github.com/en/pages/getting-started-with-github-pages/creating-a-github-pages-site
+GitHub repository: https://github.com/jaydenstab/sbuscioly
 
 ## Files
 
@@ -45,7 +43,7 @@ GitHub documentation: https://docs.github.com/en/pages/getting-started-with-gith
 ## What changed in this edition
 
 - Added a unique SciOly favicon and a social-sharing image.
-- Added Open Graph/Twitter sharing tags; **requires your real live site URL**.
+- Added Open Graph/Twitter sharing tags pointing to https://sbuscioly.club/.
 - Made the poster gallery lazy-load compressed `.webp` thumbnails, with an automatic fallback to the original JPG when a thumbnail is absent. The next/upcoming event still loads its original poster promptly.
 - Reduced repeated meeting reminders and clarified the site's About text.
 - Changed the volunteering timeline to display **Recap pending** after the date of a confirmed event, rather than implying the club actually volunteered. Only set `status: 'completed'` once verified.
