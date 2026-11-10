@@ -54,11 +54,23 @@ function renderUpcoming(event){
   const h=node('h3','',event.title),date=node('p','next-date',`${formatDate(event.date,true)} · ${timeLabel(event.startTime)}`);
   const desc=node('p','', 'Frey Hall 305');
   const badge=node('span','event-tag','NEXT UP');
-  copy.append(top,h,date,desc,badge);
+  const calendarActions = node('div');
+  calendarActions.id = 'gbm-calendar-actions';
+
+  copy.append(top,h,date,desc,badge,calendarActions);
   const imageBox=node('div','next-poster');
   const img=node('img');img.src=event.poster;img.alt=`Poster for ${event.title} GBM on ${formatDate(event.date)}`;img.loading='eager';img.decoding='async';img.setAttribute('fetchpriority','high');
   img.addEventListener('error',()=>{imageBox.replaceChildren(node('p','missing-poster','Poster image unavailable. Check the filename in data/events.js.'));});
-  imageBox.append(img);host.append(copy,imageBox);
+  imageBox.append(img);
+  host.append(copy,imageBox);
+  // Add calendar options for the upcoming GBM.
+  if (window.SBUCalendar?.render) {
+    window.SBUCalendar.render({
+      ...event,
+      location: event.location || 'Frey Hall 305, Stony Brook University, Stony Brook, NY'
+    });
+  }
+
 }
 function renderGallery(past){
   const grid=$('#galleryGrid');grid.replaceChildren();shownPast=past.slice().sort((a,b) => `${b.date}T${b.startTime}`.localeCompare(`${a.date}T${a.startTime}`));
