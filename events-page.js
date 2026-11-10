@@ -113,6 +113,17 @@ function renderUpcoming(event) {
   }
 }
 
+function renderActivityEvidence(past) {
+  const host = $('#homeRecentActivities');
+  if (!host || !past.length) return;
+  const recent = past
+    .slice()
+    .sort((a, b) => `${b.date}T${b.startTime}`.localeCompare(`${a.date}T${a.startTime}`))
+    .slice(0, 3)
+    .map(event => event.title);
+  host.textContent = `Recent meetings have included ${recent.join(', ')}.`;
+}
+
 function useGalleryImage(image, poster) {
   let usingOriginal = false;
   image.loading = 'lazy';
@@ -176,6 +187,7 @@ function refreshByTime() {
   previousState = state;
   renderUpcoming(next);
   renderGallery(past);
+  renderActivityEvidence(past);
 }
 
 const dialog = $('#posterDialog');

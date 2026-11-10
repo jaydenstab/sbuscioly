@@ -22,12 +22,12 @@
   <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml">
   <link rel="icon" href="./assets/favicon-32.png" sizes="32x32" type="image/png">
   <link rel="apple-touch-icon" href="./assets/apple-touch-icon.png">
-  <link rel="stylesheet" href="./styles.css?v=d73d08f36fb4">
+  <link rel="stylesheet" href="./styles.css?v=2421b46e4455">
   <script defer src="./script.js?v=15e307775a57"></script>
   <script defer src="./data/site.js?v=49470de5bc08"></script>
   <script defer src="./data/events.js?v=e25e8d301f98"></script>
   <script defer src="./calendar.js?v=519ecc2b0409"></script>
-  <script defer src="./events-page.js?v=fcfed937de7d"></script>
+  <script defer src="./events-page.js?v=f7d9e9e530cc"></script>
 </head>
 <body>
   <script type="application/json" id="clubConfig">{"meeting":{"day":"Tuesday","startTime":"19:00","endTime":"20:00","timeZone":"America/New_York","building":"Frey Hall","room":"305","attendanceNote":"No sign-up or prior Science Olympiad experience is needed. New visitors are welcome.","updatesNote":"Meeting dates may change during academic breaks."}}</script>
@@ -66,22 +66,32 @@
       <p class="prisma-photo-credit"><a href="https://commons.wikimedia.org/wiki/File:Life_Sciences_building_at_Stony_Brook_University.jpg" target="_blank" rel="noopener noreferrer">Life Sciences building at Stony Brook University</a> · Photo: Kenneth C. Zirkel · <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="license noopener noreferrer">CC BY 4.0</a> · cropped and optimized for web</p>
       <div class="container prisma-hero__content">
         <div class="prisma-hero__title-block">
-          <p class="prisma-hero__eyebrow">Stony Brook University</p>
+          <p class="prisma-hero__eyebrow">Stony Brook University · Science Olympiad</p>
           <h1 class="prisma-hero__title" id="prisma-title"><span>SciOly</span></h1>
         </div>
         <div class="prisma-hero__support">
           <p>A student-run Stony Brook club for science puzzles, build challenges, and games.</p>
           <div class="prisma-hero__details" aria-label="Weekly meeting time and location"><span data-meeting-field="headline">Every Tuesday, 7 PM–8 PM</span><span data-meeting-field="location">Frey Hall 305</span></div>
           <p class="prisma-hero__attendance" data-meeting-field="attendance">No sign-up or prior Science Olympiad experience is needed. New visitors are welcome.</p>
+          <p class="prisma-hero__schedule-note" data-meeting-field="updates">Meeting dates may change during academic breaks.</p>
           <a class="prisma-hero__cta" href="./meetings.html#schedule">Come to a meeting <span aria-hidden="true">→</span></a>
           <a class="prisma-hero__secondary" href="./volunteer.html">Explore volunteering</a>
         </div>
       </div>
     </section>
+    <section class="section home-activities" aria-labelledby="home-activities-title">
+      <div class="container home-activities__layout">
+        <h2 id="home-activities-title">Recent meeting topics</h2>
+        <div>
+          <p id="homeRecentActivities">Meetings bring together codebreaking, estimation puzzles, games, and build challenges.</p>
+          <a class="text-inline-link" href="./meetings.html#archive">Browse meeting flyers <span aria-hidden="true">→</span></a>
+        </div>
+      </div>
+    </section>
     <section class="section home-upcoming" aria-labelledby="home-upcoming-title">
       <div class="container">
-        <div class="section-heading split-heading"><h2 id="home-upcoming-title">Next activity</h2><p data-meeting-field="updates">Meeting dates may change during academic breaks.</p></div>
-        <section class="next-event next-event-slot" id="homeNextEvent" aria-live="polite" aria-label="Next announced meeting">
+        <div class="section-heading split-heading"><h2 id="home-upcoming-title">Next activity</h2></div>
+        <section class="next-event next-event-slot" id="homeNextEvent" aria-live="polite" aria-label="Next announced activity">
           <div class="next-pending"><h3>No upcoming activity announced.</h3><p>We post schedule changes on Instagram.</p><a class="empty-state-link" data-site-link="instagram" href="https://www.instagram.com/stonybrookscioly/" target="_blank" rel="noopener noreferrer">Follow @stonybrookscioly ↗</a></div>
         </section>
       </div>

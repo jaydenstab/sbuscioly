@@ -81,7 +81,7 @@ a:focus-visible, button:focus-visible { outline: 3px solid var(--focus-ring); ou
 .prisma-nav .nav-cta:hover { color: #fff; background: var(--red); border-color: #fff; }
 .prisma-nav .mobile-toggle { border-color: #ffffff90; background: transparent; }
 .prisma-nav .mobile-toggle span { background: #fff; }
-.prisma-hero { position: relative; isolation: isolate; display: flex; min-height: 100vh; min-height: 100svh; overflow: hidden; color: #f5f3eb; background: #111210; }
+.prisma-hero { position: relative; isolation: isolate; display: flex; min-height: min(88vh, 820px); min-height: min(88svh, 820px); overflow: hidden; color: #f5f3eb; background: #111210; }
 .prisma-campus { position: absolute; z-index: 0; inset: 0; margin: 0; overflow: hidden; }
 .prisma-campus picture, .prisma-campus img { display: block; width: 100%; height: 100%; }
 .prisma-campus img { object-fit: cover; object-position: 50% 50%; animation: prisma-campus-drift 36s ease-in-out infinite alternate; }
@@ -99,6 +99,7 @@ a:focus-visible, button:focus-visible { outline: 3px solid var(--focus-ring); ou
 .prisma-hero__support { max-width: 340px; justify-self: end; padding-bottom: 10px; }
 .prisma-hero__support p { color: #e3e0d9; font-size: 14px; line-height: 1.7; text-shadow: 0 1px 10px #0009; }
 .prisma-hero__support .prisma-hero__attendance { margin-top: 10px; color: #fff; font-size: 12px; }
+.prisma-hero__support .prisma-hero__schedule-note { margin-top: 4px; color: #e3e0d9; font-size: 11px; }
 .prisma-hero__details { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-top: 18px; padding-top: 13px; color: #fff; border-top: 1px solid #ffffff75; font-size: 13px; font-weight: 650; line-height: 1.5; text-shadow: 0 1px 10px #0009; }
 .prisma-hero__details span + span::before { content: "·"; margin-right: 18px; color: #f2c2c2; }
 .prisma-hero__cta { display: inline-flex; align-items: center; justify-content: space-between; gap: 18px; min-height: 46px; margin-top: 22px; padding: 0 16px; color: #fff; background: var(--red); border: 1px solid var(--red); border-radius: 5px; font-size: 13px; font-weight: 650; transition: background-color .18s ease, border-color .18s ease; }
@@ -109,6 +110,13 @@ a:focus-visible, button:focus-visible { outline: 3px solid var(--focus-ring); ou
 .prisma-hero a:focus-visible, .prisma-nav a:focus-visible, .prisma-nav button:focus-visible { outline-color: #fff; }
 .prisma-hero__secondary { display: inline-block; margin: 14px 0 0 12px; color: #fff; font-size: 13px; font-weight: 600; text-decoration: underline; text-decoration-color: #ffffff90; text-underline-offset: 4px; }
 .prisma-hero__secondary:hover { text-decoration-color: currentColor; }
+
+.home-activities { background: var(--wash); border-block: 1px solid var(--line); }
+.home-activities__layout { display: grid; grid-template-columns: .8fr 1.2fr; align-items: start; gap: 32px; }
+.home-activities h2 { max-width: 380px; font-family: Georgia, "Times New Roman", serif; font-size: clamp(27px, 3.5vw, 38px); font-weight: 500; line-height: 1.12; }
+.home-activities p { max-width: 640px; color: #444; font-size: 18px; line-height: 1.55; }
+.text-inline-link { display: inline-block; margin-top: 16px; color: var(--red-dark); border-bottom: 1px solid #b88; font-size: 14px; font-weight: 600; text-underline-offset: 4px; }
+.text-inline-link:hover { border-bottom-color: currentColor; }
 .home-upcoming { background: var(--wash); }
 .page-intro { margin-top: 0; padding: clamp(52px, 6vw, 78px) 0; color: var(--ink); background: var(--wash); border-bottom: 1px solid var(--line); }
 .page-intro .kicker { color: var(--red-dark); }
@@ -245,14 +253,12 @@ h2 em { color: var(--red); font-style: italic; }
 .eboard-empty { display: flex; align-items: center; gap: 16px; margin-top: 22px; padding: 22px; color: #555; background: #fff; border: 1px solid var(--line); border-radius: var(--card-radius); }
 .eboard-empty span { color: var(--red); font-size: 25px; }
 .eboard-empty p { font-size: 13px; }
-.officer-grid:has(.officer-card) { --photo-size: 96px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: start; gap: 24px; margin-top: 24px; }
-.officer-card { display: grid; grid-template-columns: var(--photo-size) minmax(0, 1fr); grid-template-rows: min-content min-content min-content; align-content: center; align-items: center; gap: 5px 14px; min-width: 0; min-height: var(--photo-size); padding: 12px; overflow-wrap: anywhere; background: #fff; border: 1px solid #e9e2df; border-radius: var(--card-radius); }
-.officer-card img, .officer-avatar { grid-column: 1; grid-row: 1 / 4; width: var(--photo-size); height: var(--photo-size); background: #f3e9e7; }
-.officer-card img { object-fit: cover; object-position: center 30%; }
-.officer-avatar { display: grid; place-items: center; color: var(--red-dark); font-size: 16px; font-weight: 700; letter-spacing: .04em; }
-.officer-role { grid-column: 2; grid-row: 1; color: #555; font-size: 11px; font-weight: 700; line-height: 1.4; text-transform: uppercase; }
-.officer-card strong { grid-column: 2; grid-row: 2; font-size: 16px; line-height: 1.3; }
-.officer-social { grid-column: 2; grid-row: 3; justify-self: start; align-self: start; margin-top: 3px; color: var(--red-dark); font-size: 12px; text-decoration: underline; text-underline-offset: 3px; }
+.officer-grid:has(.officer-card) { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: start; gap: 0 28px; margin-top: 24px; }
+.officer-card { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; min-width: 0; min-height: 100px; padding: 18px 8px; overflow-wrap: anywhere; border-top: 1px solid var(--line); }
+.officer-card img { width: 76px; height: 76px; margin-bottom: 5px; object-fit: cover; object-position: center 30%; border-radius: 50%; }
+.officer-role { color: #555; font-size: 11px; font-weight: 700; line-height: 1.4; text-transform: uppercase; }
+.officer-card strong { font-size: 16px; line-height: 1.3; }
+.officer-social { margin-top: 3px; color: var(--red-dark); font-size: 12px; text-decoration: underline; text-underline-offset: 3px; }
 
 .contact-layout { display: grid; grid-template-columns: .9fr 1.1fr; gap: 60px; }
 .meeting-connections-intro { max-width: 360px; margin-top: 16px; color: var(--muted); }
@@ -283,6 +289,7 @@ h2 em { color: var(--red); font-style: italic; }
   .prisma-hero__support { max-width: 520px; justify-self: start; padding-bottom: 0; }
   .split-heading { display: block; }
   .split-heading > p { margin-top: 14px; }
+  .home-activities__layout { grid-template-columns: 1fr; gap: 18px; }
   .volunteer-layout { gap: 42px; }
 }
 @media (max-width: 840px) {

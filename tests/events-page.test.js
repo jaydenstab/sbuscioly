@@ -12,11 +12,12 @@ function render(events) {
   const host = new FakeElement('section');
   const meetingsHost = new FakeElement('section');
   const configNode = new FakeElement('script');
+  const activityEvidence = new FakeElement('p');
   configNode.textContent = JSON.stringify(config);
   let calendarEvent = null;
   const context = {
     document: createDocument({
-      selectors: { '#clubConfig': configNode },
+      selectors: { '#clubConfig': configNode, '#homeRecentActivities': activityEvidence },
       lists: { '.next-event-slot': [host, meetingsHost], '[data-site-link="sbengaged"]': [], '[data-site-link="instagram"]': [] }
     }),
     window: {
@@ -28,7 +29,7 @@ function render(events) {
     Intl, Date, URL
   };
   vm.runInNewContext(source, context);
-  return { host, meetingsHost, calendarEvent };
+  return { host, meetingsHost, calendarEvent, activityEvidence };
 }
 
 test('homepage upcoming card renders the next confirmed event and calendar data', () => {
@@ -57,4 +58,12 @@ test('empty upcoming state remains useful and links to the verified social accou
   assert.equal(result.meetingsHost.children[0].children[0].textContent, 'No upcoming activity announced.');
   assert.equal(result.meetingsHost.children[0].children[2].href, 'https://www.instagram.com/stonybrookscioly/');
   assert.equal(result.calendarEvent, null);
+});
+
+test('homepage activity evidence is derived from past confirmed event data', () => {
+  const result = render([
+    { id: 'past', title: 'Egg Drop', date: '2000-01-02', startTime: '19:00', endTime: '20:00', poster: 'posters/egg-drop.jpg' },
+    { id: 'future', title: 'Future Activity', date: '2999-01-02', startTime: '19:00', endTime: '20:00', poster: 'posters/future.jpg' }
+  ]);
+  assert.equal(result.activityEvidence.textContent, 'Recent meetings have included Egg Drop.');
 });

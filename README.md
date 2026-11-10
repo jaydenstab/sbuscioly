@@ -49,3 +49,6 @@ Open <http://127.0.0.1:8000> to preview the site. The first command regenerates 
 | `MAINTENANCE.md` | Officer instructions for updating the site |
 
 See [MAINTENANCE.md](MAINTENANCE.md) for content updates, rebuild steps, previewing, and validation.
+
+## TODO
+- [ ] Create New logo

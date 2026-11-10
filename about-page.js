@@ -8,13 +8,6 @@ function makeNode(tag, className, text) {
   return element;
 }
 
-function initials(name) {
-  const words = name.trim().split(/\s+/).filter(Boolean);
-  return /^(vacant|tbd|to be announced)$/i.test(name.trim())
-    ? '—'
-    : words.slice(0, 2).map(word => word[0]).join('').toUpperCase();
-}
-
 function validLocalAsset(path, prefix) {
   return typeof path === 'string' && path.startsWith(`${prefix}/`) && !path.includes('..') && !path.startsWith('/') && !/[?#]/.test(path);
 }
@@ -45,6 +38,7 @@ function renderOfficers() {
     const name = vacant ? 'Vacant' : String(officer.name || 'Officer');
     if (validLocalAsset(officer.photo, 'eboard')) {
       const image = document.createElement('img');
+      card.className += ' officer-card--with-photo';
       image.src = `./${officer.photo}`;
       image.alt = `${name}, ${officer.role || 'officer'}`;
       image.loading = 'lazy';
@@ -52,9 +46,9 @@ function renderOfficers() {
       const crop = String(officer.photoPosition || '').trim();
       const match = /^(\d{1,3})%\s+(\d{1,3})%$/.exec(crop);
       if (match && Number(match[1]) <= 100 && Number(match[2]) <= 100) image.style.objectPosition = `${match[1]}% ${match[2]}%`;
-      image.addEventListener('error', () => image.replaceWith(makeNode('span', 'officer-avatar', initials(name))), { once: true });
+      image.addEventListener('error', () => image.remove(), { once: true });
       card.append(image);
-    } else card.append(makeNode('span', 'officer-avatar', initials(name)));
+    }
 
     card.append(makeNode('small', 'officer-role', officer.role || 'Officer'), makeNode('strong', '', name));
     if (!vacant && typeof officer.linkedin === 'string') {
@@ -77,8 +71,10 @@ function renderOfficers() {
 function renderPhotos() {
   const host = document.querySelector('#photoGallery');
   if (!host) return;
+  const section = document.querySelector('#photoSection');
   const photos = Array.isArray(window.SCIOLY_PHOTOS) ? window.SCIOLY_PHOTOS : [];
   const validPhotos = photos.filter(photo => photo && validLocalAsset(photo.src, 'photos') && typeof photo.alt === 'string' && photo.alt.trim());
+  if (section) section.hidden = validPhotos.length === 0;
   host.replaceChildren();
   if (!validPhotos.length) {
     host.append(makeNode('p', 'photo-gallery-empty', 'No meeting photos posted yet.'));

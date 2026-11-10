@@ -1,7 +1,7 @@
 
 window.SCIOLY_OFFICERS = [
   {
-    name: 'TBD',
+    name: 'Elisabeth Chai',
     role: 'President',
     photo: '',
     linkedin: ''
