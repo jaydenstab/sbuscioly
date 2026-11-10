@@ -2,72 +2,50 @@
 
 The website for **SBU Science Olympiad**, a student-run club at Stony Brook University.
 
-**Website:** https://sbuscioly.club
+**Website:** [sbuscioly.club](https://sbuscioly.club)
 
-## About
+The site helps new and returning members find the weekly meeting schedule, current activity announcements, flyers, volunteer opportunities, club leadership, and contact links.
 
-SBU Science Olympiad brings together students interested in science, problem-solving, and collaborative learning. Our activities include general body meetings (GBMs), Science Olympiad-inspired challenges, and opportunities to get involved in science education and volunteering.
+## Pages
 
-This website serves as a central resource for club information, meeting schedules, event flyers, announcements, and activities.
+- **Home:** Club introduction, recurring meeting details, attendance information, and the next confirmed activity.
+- **Meetings:** Weekly schedule, directions, visitor information, activity updates, calendar links, and past flyers.
+- **Volunteering:** Tournament participation and verified updates.
+- **About:** Club overview, officers, approved meeting photos, and contact/social links.
 
-## Website Features
+## Technology and hosting
 
-- **Meetings & Events:** Upcoming GBMs, event details, and an archive of past meetings.
-- **Event Gallery:** Meeting flyers with an interactive, full-screen image viewer.
-- **Volunteering:** Information and updates on the club's science education and outreach activities.
-- **Club Information:** Details about the organization, its leadership, and how to get involved.
-- **Responsive Design:** A layout designed for desktop and mobile devices.
+The site uses static HTML, CSS, vanilla JavaScript, and a small Python build script. It is hosted on GitHub Pages. There is no frontend framework or package manager.
 
-## Technology
+`data/club.json` is the source of truth for recurring meeting information. The builder renders crawlable schedule text, expands `_includes/`, and applies stable content hashes to local CSS and JavaScript. Committed HTML is standalone and works on GitHub Pages without a server-side build step.
 
-The website is built with:
-
-- HTML5
-- CSS3
-- Vanilla JavaScript
-
-It uses no frontend framework or build system.
-
-**Hosting:** GitHub Pages  
-**Domain:** [sbuscioly.club](https://sbuscioly.club)
-
-## Project Structure
-
-| File / Directory | Description |
-|---|---|
-| `index.html` | Main website structure and metadata |
-| `styles.css` | Website styling and responsive layout |
-| `script.js` | Interactive features and event display logic |
-| `data/` | Club events, officers, volunteering, photos, and configuration |
-| `posters/` | Event flyers and optimized gallery thumbnails |
-| `assets/` | Website icons and social-sharing images |
-| `MAINTENANCE.md` | Website maintenance and updating instructions |
-
-## Running Locally
-
-Clone the repository:
+## Local development
 
 ```bash
-git clone https://github.com/jaydenstab/sbuscioly.git
-cd sbuscioly
-```
-
-Start a local development server:
-
-```bash
+python3 tools/build_site.py
+python3 tools/build_site.py --check
+python3 -m unittest discover -s tests -p 'test_*.py'
+node --test tests/*.test.js
 python3 -m http.server 8000
 ```
 
-Visit http://localhost:8000 in your browser.
+Open <http://127.0.0.1:8000> to preview the site. The first command regenerates the committed pages. The remaining validation commands check for stale output, broken local links, schedule consistency, and volunteer date/status regressions. GitHub Actions runs the automated checks on pushes and pull requests.
 
-Alternatively, open the project in Visual Studio Code and use the Live Server extension.
+## Project structure
 
-## Maintenance
+| File or directory | Purpose |
+|---|---|
+| `index.html`, `meetings.html`, `about.html`, `volunteer.html` | Static pages |
+| `_includes/` | Shared header and footer templates |
+| `tools/build_site.py` | Static page generation, cache hashes, and stale-output check |
+| `data/club.json` | Recurring meeting configuration |
+| `data/events.js` | Confirmed GBM activities and flyer paths |
+| `data/volunteering.js` | Volunteer dates, verification state, and recap notes |
+| `data/officers.js` | Current officer names and approved profile details |
+| `data/photos.js` | Approved meeting photo gallery entries |
+| `data/site.js` | SBEngaged and Instagram destinations |
+| `*-page.js` and `script.js` | Page-specific rendering and shared navigation |
+| `tests/` | Python build/link checks and Node status regression tests |
+| `MAINTENANCE.md` | Officer instructions for updating the site |
 
-Website content is maintained through the JavaScript files in `data/`. Changes pushed to the main branch are published through GitHub Pages.
-
-For instructions on updating events, flyers, and other club information, see [`MAINTENANCE.md`](MAINTENANCE.md).
-
-## Contact
-
-For club information, meeting announcements, and ways to get involved, visit [sbuscioly.club](https://sbuscioly.club).
+See [MAINTENANCE.md](MAINTENANCE.md) for content updates, rebuild steps, previewing, and validation.

@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#990000">
+  <meta name="description" content="Find SBU Science Olympiad meeting times, upcoming activities, and past meeting flyers.">
+  <title>Meetings | SBU Science Olympiad</title>
+  <link rel="canonical" href="https://sbuscioly.club/meetings.html">
+  <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="./styles.css?v=f83a340f706c">
+  <script defer src="./script.js?v=15e307775a57"></script><script defer src="./data/site.js?v=10992c5cd300"></script><script defer src="./data/events.js?v=e25e8d301f98"></script><script defer src="./calendar.js?v=519ecc2b0409"></script><script defer src="./events-page.js?v=6b4841ac4730"></script>
+</head>
+<body>
+  <script type="application/json" id="clubConfig">{"meeting":{"day":"Tuesday","startTime":"19:00","endTime":"20:00","timeZone":"America/New_York","building":"Frey Hall","room":"305","attendanceNote":"No sign-up or prior Science Olympiad experience is needed. New visitors are welcome.","updatesNote":"Meeting dates may change during academic breaks."}}</script>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <!-- SHARED HEADER START -->
+<header class="nav-shell">
+  <a class="brand" href="./index.html" aria-label="SBU Science Olympiad home">
+    <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none"><ellipse cx="24" cy="24" rx="19" ry="8.1" stroke="currentColor" stroke-width="2.3" transform="rotate(55 24 24)"></ellipse><ellipse cx="24" cy="24" rx="19" ry="8.1" stroke="currentColor" stroke-width="2.3" transform="rotate(-55 24 24)"></ellipse><circle cx="24" cy="24" r="4" fill="currentColor"></circle></svg></span>
+    <span class="brand-name">SBU SciOly<small>Student organization</small></span>
+  </a>
+  <nav class="nav-links" aria-label="Main navigation">
+    <a href="./index.html">Home</a>
+    <a href="./meetings.html" aria-current="page">Meetings</a>
+    <a href="./volunteer.html">Volunteer</a>
+    <a href="./about.html">About</a>
+  </nav>
+  <button class="mobile-toggle" id="mobileToggle" type="button" aria-controls="mobileNav" aria-expanded="false" aria-label="Open navigation"><span></span><span></span></button>
+</header>
+<nav class="mobile-nav" id="mobileNav" aria-label="Mobile navigation" hidden>
+  <a href="./index.html">Home</a>
+  <a href="./meetings.html" aria-current="page">Meetings</a>
+  <a href="./volunteer.html">Volunteer</a>
+  <a href="./about.html">About</a>
+</nav>
+<!-- SHARED HEADER END -->
+  <main id="main">
+    <header class="page-intro"><div class="container"><p class="kicker">SBU SCIENCE OLYMPIAD</p><h1>Meetings &amp; activities</h1><p>Find the weekly schedule, upcoming activities, and past meeting flyers.</p></div></header>
+    <section class="section" id="schedule"><div class="container">
+      <div class="section-heading split-heading"><h2>Weekly meeting</h2><p data-meeting-field="updates">Meeting dates may change during academic breaks.</p></div>
+      <div class="meeting-grid">
+        <section class="weekly-card"><h3 class="weekly-big" data-meeting-field="day">Tuesday</h3><div class="weekly-details"><div><small>TIME</small><strong data-meeting-field="time">7 PM–8 PM</strong></div><div><small>ROOM</small><strong data-meeting-field="location">Frey Hall 305</strong></div></div><a class="button button-secondary" data-meeting-map-link="true" href="https://www.google.com/maps/search/?api=1&amp;query=Frey+Hall+Stony+Brook+University" target="_blank" rel="noopener noreferrer">Directions to <span data-meeting-field="building">Frey Hall</span> ↗</a><p class="micro-note" data-meeting-field="attendance">No sign-up or prior Science Olympiad experience is needed. New visitors are welcome.</p></section>
+        <section class="next-event next-event-slot" id="nextEvent" aria-live="polite" aria-label="Next announced meeting"><div class="next-pending"><h3>No upcoming activity announced.</h3><p>We post schedule changes on Instagram.</p><a class="empty-state-link" data-site-link="instagram" href="https://www.instagram.com/stonybrookscioly/" target="_blank" rel="noopener noreferrer">Follow @stonybrookscioly ↗</a></div></section>
+      </div>
+    </div></section>
+    <section class="section archive-section" id="archive"><div class="container"><div class="section-heading split-heading"><div><p class="kicker">PAST ACTIVITIES</p><h2>Meeting <em>archive</em></h2></div><p>Browse flyers from past meetings. Select one to view it full size.</p></div><div class="poster-grid" id="galleryGrid"></div><div class="other-events" id="otherEvents"></div></div></section>
+  </main>
+  <!-- SHARED FOOTER START -->
+<footer class="footer">
+  <div class="container footer-inner">
+    <strong>SBU Science Olympiad</strong>
+    <p>The contents of this student club website and its link identifiers are not monitored, reviewed, sponsored, or endorsed by Stony Brook University.</p>
+    <a href="./about.html#contact">Contact the club</a>
+  </div>
+</footer>
+<!-- SHARED FOOTER END -->
+  <dialog class="poster-dialog" id="posterDialog" aria-label="Full-size meeting poster"><div class="dialog-bar"><div><span>MEETING POSTER</span><h3 id="dialogTitle"></h3><small id="dialogDate"></small></div><button class="dialog-close" id="dialogClose" type="button" aria-label="Close poster">×</button></div><div class="dialog-image-wrap"><img id="dialogImage" alt=""></div><div class="dialog-bottom"><span id="dialogIndex"></span><div><button id="dialogPrev" type="button">← Previous</button><button id="dialogNext" type="button">Next →</button></div></div></dialog>
+</body>
+</html>

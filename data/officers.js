@@ -21,13 +21,13 @@ window.SCIOLY_OFFICERS = [
   {
     name: 'Samuel Wang',
     role: 'Secretary',
-    photo: 'eboard/monkey.png',
+    photo: '',
     linkedin: ''
   },
   {
     name: 'Emily Fernandez',
     role: 'Public Relations Officer',
-    photo: 'eboard/emilymonkey.png',
+    photo: '',
     linkedin: ''
   },
   {

@@ -1,6 +1,6 @@
 /*
   Update this file when you post a new GBM flyer.
-  Date/time is the actual meeting time in America/New_York.
+  Date/time is the actual meeting time in data/club.json's configured time zone.
   Past/upcoming placement is automatic once endTime has passed.
   Only list confirmed activity details. Generic weekly meeting info lives in the page.
 */

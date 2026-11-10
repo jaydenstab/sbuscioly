@@ -1,98 +1,88 @@
-# Updating the SBU SciOly website
+# Maintaining the SBU SciOly website
 
-Keep this file in the GitHub repository. At each E-Board transition, give new officers access to the organization repo, verify contact details, and review the website once per semester.
+The site is a static website. Make content changes in `data/`, shared layout changes in `_includes/`, and styling or behavior changes in CSS/JavaScript. After any source change, rebuild and run the validation commands below before committing.
 
-## Publish a new GBM flyer (roughly 2 minutes)
+## Rebuild and validate
 
-1. Export the original flyer as a JPG or PNG. Use a lowercase filename with hyphens, e.g. `puzzle-night.jpg`.
-2. Add the image to `posters/`.
-3. Edit `data/events.js`. Add the actual title, date, meeting start and end time, type, and poster path. Example:
+From the repository root:
 
-```js
-{
-  id: 'unique-puzzle-2027',
-  title: 'Actual confirmed activity',
-  date: '2027-02-02',
-  startTime: '19:00',
-  endTime: '20:00',
-  type: 'Puzzles & games',
-  poster: 'posters/puzzle-night.jpg'
-},
+```bash
+python3 tools/build_site.py
+python3 tools/build_site.py --check
+python3 -m unittest discover -s tests -p 'test_*.py'
+node --test tests/*.test.js
 ```
 
-4. Save and commit your changes to GitHub. The site features the next announced GBM and automatically moves it to Past GBMs after its scheduled end time in New York.
-5. Optional but recommended: create a 700-pixel-wide WebP thumbnail in `posters/thumbs/` with the same basename, e.g. `puzzle-night.webp`. If you skip this, the website automatically loads the original JPG/PNG instead.
+The build expands `_includes/`, inserts recurring meeting details from `data/club.json`, and writes deterministic SHA-256 content hashes into local CSS and JavaScript URLs. It updates only generated sections, config values, and asset URLs in the four HTML pages; page content remains hand maintained. `--check` is read-only and fails if a template, data value, or asset changed without regenerating the pages. GitHub Actions runs the checks on pushes and pull requests.
 
-Do not announce a GBM in the data file before the club has actually confirmed it. You do **not** need to edit `index.html` to publish a new event.
+Preview after rebuilding:
 
-## Update Nassau East or another volunteer event
+```bash
+python3 -m http.server 8000
+```
+
+Open <http://127.0.0.1:8000>. Stop the server with Ctrl+C.
+
+## Recurring meetings
+
+Edit `data/club.json` to update the weekly meeting day, time, time zone, building, room, visitor note, or schedule-change note. Use 24-hour `HH:MM` values and a valid IANA time zone. The builder generates the crawlable schedule text and a small runtime config from this file. Do not copy the schedule into HTML or JavaScript. Rebuild after changing it.
+
+The time zone also determines when event cards move from upcoming activities to the flyer archive and how volunteer dates are interpreted.
+
+## Announce or edit a GBM
+
+1. Add the approved flyer image under `posters/` and optionally a WebP preview under `posters/thumbs/`.
+2. Add or update the event object in `data/events.js`, using a unique `id`, the confirmed title, ISO date (`YYYY-MM-DD`), 24-hour start and end times, type, and exact poster path.
+3. Do not add tentative or unconfirmed activities. Past events move to the archive after their end time in the configured New York time zone.
+4. Rebuild and validate. The homepage and Meetings page use the same event data and calendar links.
+
+The original poster is used in the full-size viewer. If a thumbnail is missing, the archive falls back to the original image.
+
+## Volunteer updates
 
 Edit `data/volunteering.js`:
 
-- `status: 'tentative'` for unconfirmed plans.
-- `status: 'confirmed'` when participation has been confirmed, but the event has not yet been completed.
-- `status: 'completed'` **only after confirming your club actually volunteered**, and change `note` to a factual past-tense recap.
+- `tentative`: plans are not confirmed.
+- `confirmed`: participation is confirmed, but the tournament has not yet occurred.
+- `completed`: use only after confirming club members attended. This means verified completion and displays as completed immediately, including on the event date.
+- `canceled` or `cancelled`: the opportunity was canceled.
 
-Once a date passes while an entry remains confirmed, the site shows **Recap pending**. This is intentional.
+After a confirmed event date passes, the page says **Recap pending** until the entry is changed to `completed` and the note records a factual recap. Dates must be valid ISO dates. Entries with missing or invalid dates are shown safely as undated and are not treated as past events.
 
-## Edit the E-Board
+## Meeting photos
 
-Edit `data/officers.js`. Use the correct name and position. Set `photo: ''` and `linkedin: ''` until each officer provides a photo/profile and agrees to have it published. Images can go in `eboard/` and be referenced as `eboard/filename.jpg`. The code displays a LinkedIn link only for a valid LinkedIn HTTPS URL.
-
-### Fine-tune individual officer photos
-
-All photos use identical square frames, so the card layout stays compact.
-The default cropping focuses near the upper part of each image. To adjust a single
-photo without changing anyone else's, add the optional `photoPosition` property
-**inside that officer's existing object** in `data/officers.js`:
+Only publish photos members have approved for public sharing. Add images to the repository under `photos/`, then edit `data/photos.js`. Array order is display order; remove an entry to remove its photo. Each entry needs a local `src` path and meaningful `alt` text. `caption` is optional.
 
 ```js
-{
-  name: 'Samuel Wang',
-  role: 'Secretary',
-  photo: 'eboard/samuel-wang.jpg',
-  photoPosition: '50% 20%', // horizontal 50%, vertical 20%
-  linkedin: ''
-}
+window.SCIOLY_PHOTOS = [
+  {
+    src: 'photos/egg-drop-team.jpg',
+    alt: 'Members testing their Egg Drop designs',
+    caption: 'Egg Drop meeting'
+  }
+];
 ```
 
-`50% 50%` centers the photo. `50% 15%` shifts the crop toward the top of the
-original image. Values must be two percentages from 0% to 100% separated by a
-space. Remove the property to use the default crop.
+For responsive image delivery, you may also provide local width candidates:
 
-For faster loading, consider converting large officer JPGs to small WebP files
-(roughly 300–500px wide), then update each `photo` path. Keep originals privately
-if you need them again. **Do not overwrite `data/officers.js` with an example**:
-retain your current officer names and any photo filenames you've already added.
+```js
+srcset: 'photos/egg-drop-team-600.webp 600w, photos/egg-drop-team-1200.webp 1200w'
+```
 
+The About page displays the gallery in this order, loads images lazily, and shows a friendly fallback for an empty list or a missing image. Do not link to images hosted elsewhere. Use photos the club owns or assets with a license that permits website reuse; retain any required creator, source, and license attribution on the page or in the asset documentation.
 
-## Add GBM highlights
+## Officers
 
-Only use photos that can be shared with appropriate consent. Store them in `photos/`, then add them to `data/photos.js`. The placeholder is replaced automatically when an entry is present.
+Edit `data/officers.js` with current officer names and roles. Use `name: 'Vacant'` for an open role; do not use a placeholder person. Keep `photo` and `linkedin` empty unless the officer approved publication. Store approved local portraits under `eboard/`. LinkedIn links must use HTTPS. An optional `photoPosition` such as `'50% 20%'` adjusts the crop.
 
-## Replace the directory link with your own SBEngaged page
+## Contact and social links
 
-Copy the exact URL from your public club page in SBEngaged, open `data/site.js`, and change `sbengagedUrl` and `sbengagedLabel`. Don't guess the URL.
+Edit `data/site.js` for the club’s SBEngaged and Instagram links and labels. Use the exact public URLs. Email and other contact information in `about.html` should be kept current by an officer. Rebuild after changing data so the generated asset hashes are refreshed.
 
-## Change the domain and sharing preview
+## Before publishing
 
-If you rename the GitHub organization or buy a domain, update the **`og:url`**, **`og:image`**, and **`twitter:image`** values in `index.html`. Use complete `https://` URLs. Test the share card on the real published site (not a local HTML file). Social apps may cache an old preview.
-
-## Before pushing a change
-
-- Does the upcoming event card show the right title and date?
-- Do posters open at full resolution? Are new poster filenames lowercase and exact?
-- Do the meeting room and schedule still match current club announcements?
-- Did a volunteer event pass, and do we have a verified recap?
-- Are officers and links current and approved for publication?
-- Does the site fit a phone screen, and does the menu work?
-- Do `index.html`, `styles.css`, `script.js`, `data/`, `posters/`, `assets/` all exist in the repository root?
-
-## If a poster does not load
-
-1. Check whether the file is really inside `posters/` in the repository.
-2. Check case and hyphens: `egg-drop.jpg` differs from `egg drop.jpg`.
-3. Reload after GitHub Pages finishes deploying. The browser may show a cached older page.
-4. A `thumbs/` preview is optional: the site should fall back to the original poster automatically.
-
-No private payment methods, student records, or contact lists should be stored in this public GitHub repository.
+- Run all four commands in **Rebuild and validate**.
+- Review Home, Meetings, About, and Volunteering at desktop and phone widths.
+- Confirm meeting room/time, event dates and flyers, social links, officer details, and approved photo alt text.
+- Review the Git diff so generated changes are limited to expected pages and no unrelated edits were removed.
+- Do not store private payment details, student records, or contact lists in this public repository.

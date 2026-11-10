@@ -1,0 +1,20 @@
+{% assign current_page = include.current %}
+<header class="nav-shell{% if current_page == 'home' %} prisma-nav{% endif %}">
+  <a class="brand" href="./index.html" aria-label="SBU Science Olympiad home">
+    <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none"><ellipse cx="24" cy="24" rx="19" ry="8.1" stroke="currentColor" stroke-width="2.3" transform="rotate(55 24 24)"></ellipse><ellipse cx="24" cy="24" rx="19" ry="8.1" stroke="currentColor" stroke-width="2.3" transform="rotate(-55 24 24)"></ellipse><circle cx="24" cy="24" r="4" fill="currentColor"></circle></svg></span>
+    <span class="brand-name">SBU SciOly<small>Student organization</small></span>
+  </a>
+  <nav class="nav-links" aria-label="Main navigation">
+    <a href="./index.html"{% if current_page == 'home' %} aria-current="page"{% endif %}>Home</a>
+    <a href="./meetings.html"{% if current_page == 'meetings' %} aria-current="page"{% endif %}>Meetings</a>
+    <a href="./volunteer.html"{% if current_page == 'volunteer' %} aria-current="page"{% endif %}>Volunteer</a>
+    <a href="./about.html"{% if current_page == 'about' %} aria-current="page"{% endif %}>About</a>
+  </nav>
+  <button class="mobile-toggle" id="mobileToggle" type="button" aria-controls="mobileNav" aria-expanded="false" aria-label="Open navigation"><span></span><span></span></button>
+</header>
+<nav class="mobile-nav" id="mobileNav" aria-label="Mobile navigation" hidden>
+  <a href="./index.html"{% if current_page == 'home' %} aria-current="page"{% endif %}>Home</a>
+  <a href="./meetings.html"{% if current_page == 'meetings' %} aria-current="page"{% endif %}>Meetings</a>
+  <a href="./volunteer.html"{% if current_page == 'volunteer' %} aria-current="page"{% endif %}>Volunteer</a>
+  <a href="./about.html"{% if current_page == 'about' %} aria-current="page"{% endif %}>About</a>
+</nav>

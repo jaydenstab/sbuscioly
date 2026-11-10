@@ -2,29 +2,30 @@
 /*
  * SBU SciOly — Add to Calendar
  * Google Calendar and downloadable .ics events.
- * All meeting times are in America/New_York.
+ * Meeting times use the time zone passed from data/club.json.
  */
 
 (function () {
   "use strict";
 
-  const TIME_ZONE = "America/New_York";
   const SITE_URL = "https://sbuscioly.club/";
   const TARGET_ID = "gbm-calendar-actions";
+  const zoneFormatters = new Map();
 
-  const zoneFormatter = new Intl.DateTimeFormat("en-US", {
-    timeZone: TIME_ZONE,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    hourCycle: "h23"
-  });
-
-  function zonedParts(instant) {
+  function zonedParts(instant, timeZone) {
+    if (!zoneFormatters.has(timeZone)) {
+      zoneFormatters.set(timeZone, new Intl.DateTimeFormat("en-US", {
+        timeZone,
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        hourCycle: "h23"
+      }));
+    }
     return Object.fromEntries(
-      zoneFormatter.formatToParts(new Date(instant))
+      zoneFormatters.get(timeZone).formatToParts(new Date(instant))
         .filter(part => part.type !== "literal")
         .map(part => [part.type, Number(part.value)])
     );
@@ -55,7 +56,7 @@
     return { hour, minute };
   }
 
-  function easternDateToUTC(dateText, timeText) {
+  function localDateToUTC(dateText, timeText, timeZone) {
     if (typeof dateText !== "string") return null;
 
     const match = /^(\d{4})-(\d{2})-(\d{2})$/
@@ -84,12 +85,12 @@
       return null;
     }
 
-    // Determine possible Eastern offsets around the event.
+    // Determine possible offsets in the event's local time zone around the date.
     const offsets = new Set();
 
     for (const shift of [-36, -12, 0, 12, 36]) {
       const sample = naive + shift * 3600000;
-      const p = zonedParts(sample);
+      const p = zonedParts(sample, timeZone);
 
       const asUTC = Date.UTC(
         p.year, p.month - 1, p.day, p.hour, p.minute
@@ -101,7 +102,7 @@
     const matches = [...offsets]
       .map(offset => naive - offset * 60000)
       .filter(instant => {
-        const p = zonedParts(instant);
+        const p = zonedParts(instant, timeZone);
 
         return (
           p.year === year &&
@@ -112,7 +113,7 @@
         );
       });
 
-    // Never guess during ambiguous or nonexistent DST times.
+    // Never guess during ambiguous or nonexistent daylight-saving times.
     return matches.length === 1
       ? new Date(matches[0])
       : null;
@@ -142,6 +143,7 @@
       event.calendar && typeof event.calendar === "object"
         ? event.calendar
         : event;
+    const timeZone = calendar.timeZone ?? event.timeZone;
 
     const title = String(event.title ?? event.name ?? "").trim();
 
@@ -151,10 +153,13 @@
     const endText =
       calendar.endTime ?? calendar.end ?? calendar.timeEnd;
 
-    const start = easternDateToUTC(date, startText);
-    const end = easternDateToUTC(
+    if (typeof timeZone !== "string" || !timeZone.trim()) return null;
+
+    const start = localDateToUTC(date, startText, timeZone);
+    const end = localDateToUTC(
       calendar.endDate ?? date,
-      endText
+      endText,
+      timeZone
     );
 
     if (
@@ -182,7 +187,7 @@
       .replace(/-+/g, "-")
       .slice(0, 100);
 
-    return { title, start, end, location, id };
+    return { title, start, end, location, id, timeZone };
   }
 
   function utcStamp(date) {
@@ -198,7 +203,7 @@
       dates: (
         `${utcStamp(event.start)}/${utcStamp(event.end)}`
       ),
-      ctz: TIME_ZONE,
+      ctz: event.timeZone,
       details: (
         `SBU Science Olympiad GBM. ` +
         `Check ${SITE_URL} for updates.`
@@ -347,7 +352,7 @@
     const note = document.createElement("small");
     note.className = "calendar-note";
     note.textContent =
-      "Eastern Time. Saved events don't update automatically " +
+      `${item.timeZone}. Saved events don't update automatically ` +
       "if plans change.";
 
     target.append(label, google, download, note);

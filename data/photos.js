@@ -1,4 +1,4 @@
-/* When you have consented photos, add them here.
-   Example later: { src: 'photos/egg-drop-team.jpg', alt: 'Members testing their Egg Drop designs', caption: 'Egg Drop GBM' }
+/* Add approved local photos in display order. Meaningful alt text is required.
+   Optional: caption and a local srcset of width candidates. See MAINTENANCE.md.
 */
 window.SCIOLY_PHOTOS = [];
