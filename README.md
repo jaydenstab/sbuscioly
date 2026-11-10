@@ -1,59 +1,73 @@
-# SBU SciOly website — GitHub Pages
+# SBU SciOly
 
-This is the updated source site. It uses plain HTML, CSS, and JavaScript (no npm or React build required). The seven GBM flyers are included in `posters/`, and smaller `.webp` gallery previews live in `posters/thumbs/`.
+The website for **SBU Science Olympiad**, a student-run club at Stony Brook University.
 
-## Preview before publishing
+**Website:** https://sbuscioly.club
 
-1. Download and unzip the folder.
-2. Open the folder in VS Code.
-3. Open `index.html` in your browser, or use the VS Code Live Server extension.
-4. Check the poster viewer, mobile navigation, volunteering status, and E-Board cards.
+## About
 
-## Live website
+SBU Science Olympiad brings together students interested in science, problem-solving, and collaborative learning. Our activities include general body meetings (GBMs), Science Olympiad-inspired challenges, and opportunities to get involved in science education and volunteering.
 
-https://sbuscioly.club/
+This website serves as a central resource for club information, meeting schedules, event flyers, announcements, and activities.
 
-This is the student-run SBU Science Olympiad website, hosted
-for free on GitHub Pages with a custom domain managed by Porkbun.
+## Website Features
 
-## Publishing updates
+- **Meetings & Events:** Upcoming GBMs, event details, and an archive of past meetings.
+- **Event Gallery:** Meeting flyers with an interactive, full-screen image viewer.
+- **Volunteering:** Information and updates on the club's science education and outreach activities.
+- **Club Information:** Details about the organization, its leadership, and how to get involved.
+- **Responsive Design:** A layout designed for desktop and mobile devices.
 
-1. Edit and preview the website in VS Code.
-2. Commit your changes and push them to the main branch.
-3. Check GitHub Actions to confirm deployment succeeded.
-4. Visit https://sbuscioly.club/ to verify the updates.
+## Technology
 
-GitHub repository: https://github.com/jaydenstab/sbuscioly
+The website is built with:
 
-## Files
+- HTML5
+- CSS3
+- Vanilla JavaScript
 
-- `index.html`: website markup, SEO/social-sharing metadata, favicon declarations.
-- `styles.css`: red/white visual system and responsive styles.
-- `script.js`: event automation, gallery, E-Board, links, volunteering status, interactive behaviors.
-- `data/events.js`: event posters, verified GBM titles and dates.
-- `data/volunteering.js`: volunteering status and notes (Nassau East is confirmed as of the provided update).
-- `data/officers.js`: current officers and optional consented LinkedIn links.
-- `data/photos.js`: club photos (empty pending consented photos).
-- `data/site.js`: SBEngaged URL and label.
-- `posters/*.jpg`: original, full-resolution flyers.
-- `posters/thumbs/*.webp`: lightweight gallery-only previews; original JPGs remain for full-screen view.
-- `assets/`: favicon and 1200 × 630 social-sharing preview.
-- `MAINTENANCE.md`: recurring updates and troubleshooting.
+It uses no frontend framework or build system.
 
-## What changed in this edition
+**Hosting:** GitHub Pages  
+**Domain:** [sbuscioly.club](https://sbuscioly.club)
 
-- Added a unique SciOly favicon and a social-sharing image.
-- Added Open Graph/Twitter sharing tags pointing to https://sbuscioly.club/.
-- Made the poster gallery lazy-load compressed `.webp` thumbnails, with an automatic fallback to the original JPG when a thumbnail is absent. The next/upcoming event still loads its original poster promptly.
-- Reduced repeated meeting reminders and clarified the site's About text.
-- Changed the volunteering timeline to display **Recap pending** after the date of a confirmed event, rather than implying the club actually volunteered. Only set `status: 'completed'` once verified.
-- Made E-Board cards show role before name. `TBD` becomes a neutral 'To be announced' label. Optional LinkedIn links display only if a permitted LinkedIn URL is supplied.
-- Updated the displayed Nassau East volunteering note to be concise, without repeating the date.
+## Project Structure
 
-## SBEngaged profile
+| File / Directory | Description |
+|---|---|
+| `index.html` | Main website structure and metadata |
+| `styles.css` | Website styling and responsive layout |
+| `script.js` | Interactive features and event display logic |
+| `data/` | Club events, officers, volunteering, photos, and configuration |
+| `posters/` | Event flyers and optimized gallery thumbnails |
+| `assets/` | Website icons and social-sharing images |
+| `MAINTENANCE.md` | Website maintenance and updating instructions |
 
-The current link in `data/site.js` leads to the official group directory. A direct public URL for SBU SciOly was **not verified**, so one has not been invented. Once you copy the exact public club URL from SBEngaged, replace `sbengagedUrl` and `sbengagedLabel` there.
+## Running Locally
 
-## One content caution
+Clone the repository:
 
-Nassau East is scheduled for January 30, 2027, and your club has confirmed that it plans to volunteer. The website should not mark attendance **completed** automatically merely because the date passes. The code intentionally waits for you to verify that your members attended.
+```bash
+git clone https://github.com/jaydenstab/sbuscioly.git
+cd sbuscioly
+```
+
+Start a local development server:
+
+```bash
+python3 -m http.server 8000
+```
+
+Visit http://localhost:8000 in your browser.
+
+Alternatively, open the project in Visual Studio Code and use the Live Server extension.
+
+## Maintenance
+
+Website content is maintained through the JavaScript files in `data/`. Changes pushed to the main branch are published through GitHub Pages.
+
+For instructions on updating events, flyers, and other club information, see [`MAINTENANCE.md`](MAINTENANCE.md).
+
+## Contact
+
+For club information, meeting announcements, and ways to get involved, visit [sbuscioly.club](https://sbuscioly.club).
