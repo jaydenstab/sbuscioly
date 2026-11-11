@@ -13,7 +13,7 @@ python3 -m unittest discover -s tests -p 'test_*.py'
 node --test tests/*.test.js
 ```
 
-The build expands `_includes/`, inserts recurring meeting details from `data/club.json`, and writes deterministic SHA-256 content hashes into local CSS and JavaScript URLs. It updates only generated sections, config values, and asset URLs in the four HTML pages; page content remains hand maintained. `--check` is read-only and fails if a template, data value, or asset changed without regenerating the pages. GitHub Actions runs the checks on pushes and pull requests.
+The build expands `_includes/`, inserts recurring meeting details from `data/club.json`, renders a static list of published event dates from `data/events.js`, officer profiles, and volunteer opportunity details, fills static external-link fallbacks from `data/site.js`, and writes deterministic SHA-256 content hashes into local CSS and JavaScript URLs. Generated sections, config values, and asset URLs are refreshed in the four HTML pages; other page content remains hand maintained. JavaScript updates date-sensitive event and volunteer states using the club time zone. The static volunteer order is date-independent, so generated output does not change as the calendar advances. `--check` is read-only and fails if a template, data value, or asset changed without regenerating the pages. GitHub Actions runs the checks on pushes and pull requests.
 
 Preview after rebuilding:
 
@@ -29,18 +29,20 @@ Edit `data/club.json` to update the weekly meeting day, time, time zone, buildin
 
 The time zone also determines when event cards move from upcoming activities to the flyer archive and how volunteer dates are interpreted.
 
+For a confirmed one-time change, put the exact affected date and replacement details in `meeting.scheduleNotice`. It appears on Home and Meetings from this single source. Clear the notice after the affected date so an old change is not mistaken for a current one. Leave it empty when there is no confirmed change; do not add speculative cancellations.
+
 ## Announce or edit a GBM
 
 1. Add the approved flyer image under `posters/` and optionally a WebP preview under `posters/thumbs/`.
-2. Add or update the event object in `data/events.js`, using a unique `id`, the confirmed title, ISO date (`YYYY-MM-DD`), 24-hour start and end times, type, and exact poster path.
+2. Add or update the JSON-compatible event object in `data/events.js`, using a unique `id`, the confirmed title, ISO date (`YYYY-MM-DD`), 24-hour start and end times, type, and exact poster path.
 3. Do not add tentative or unconfirmed activities. Past events move to the archive after their end time in the configured New York time zone.
-4. Rebuild and validate. The homepage and Meetings page use the same event data and calendar links.
+4. Rebuild and validate. Home and Meetings use the same event data and calendar links. A static list of published titles and dates remains available without JavaScript; JavaScript determines whether each dated activity is upcoming or past.
 
 The original poster is used in the full-size viewer. If a thumbnail is missing, the archive falls back to the original image.
 
 ## Volunteer updates
 
-Edit `data/volunteering.js`:
+Edit the JSON-compatible array in `data/volunteering.js`:
 
 - `tentative`: plans are not confirmed.
 - `confirmed`: participation is confirmed, but the tournament has not yet occurred.
@@ -48,6 +50,8 @@ Edit `data/volunteering.js`:
 - `canceled` or `cancelled`: the opportunity was canceled.
 
 After a confirmed event date passes, the page says **Recap pending** until the entry is changed to `completed` and the note records a factual recap. Dates must be valid ISO dates. Entries with missing or invalid dates are shown safely as undated and are not treated as past events.
+
+Rebuild after editing. The builder includes the latest opportunity names, dates, and notes in the static page as a no-JavaScript fallback; the page script adds current date-based statuses and reorders entries in the configured time zone.
 
 ## Meeting photos
 
@@ -69,15 +73,17 @@ For responsive image delivery, you may also provide local width candidates:
 srcset: 'photos/egg-drop-team-600.webp 600w, photos/egg-drop-team-1200.webp 1200w'
 ```
 
-The About page displays the gallery in this order, loads images lazily, and shows a friendly fallback for an empty list or a missing image. Do not link to images hosted elsewhere. Use photos the club owns or assets with a license that permits website reuse; retain any required creator, source, and license attribution on the page or in the asset documentation.
+The About page displays the gallery in this order and loads images lazily. The section is hidden when the list contains no valid approved photos. A broken image is replaced with a short unavailable notice. Do not link to images hosted elsewhere. Use photos the club owns or assets with a license that permits website reuse; retain any required creator, source, and license attribution on the page or in the asset documentation.
 
 ## Officers
 
-Edit `data/officers.js` with current officer names and roles. Use `name: 'Vacant'` for an open role; do not use a placeholder person. Keep `photo` and `linkedin` empty unless the officer approved publication. Store approved local portraits under `eboard/`. LinkedIn links must use HTTPS. An optional `photoPosition` such as `'50% 20%'` adjusts the crop.
+Edit the JSON-compatible array in `data/officers.js` with current officer names and roles. Use `"name": "Vacant"` for an open role; do not use a placeholder person. Keep `photo` and `linkedin` empty unless the officer approved publication. Store approved local portraits under `eboard/`. LinkedIn links must use HTTPS. An optional `photoPosition` such as `"50% 20%"` adjusts the crop. The builder renders the names and roles into `about.html`, so leadership information remains available without JavaScript; rebuild after edits.
 
 ## Contact and social links
 
-Edit `data/site.js` for the club’s SBEngaged and Instagram links, the email list form, and the future GBM idea form. Use the current public URLs; the Meetings page reads those form destinations from this file. Email and other contact information in `about.html` should be kept current by an officer. Rebuild after changing data so the generated asset hashes are refreshed.
+Edit the JSON-compatible values in `data/site.js` for the club’s SBEngaged and Instagram links, the email list form, and the future GBM idea form. The email list CTA links directly to its verified public Google Form. The GBM idea form URL is present, but its owner must allow responders with the link and verify access in a signed-out browser; the website cannot change Google permissions. The builder keeps static link fallbacks in sync with this file, while page JavaScript enhances those links from the same data. Email and other contact information in `about.html` should be kept current by an officer. Rebuild after changing data so generated pages and asset hashes are refreshed.
+
+Before publishing any external form link, open it in a signed-out browser without submitting a response. Confirm the form is the club’s intended destination and that its sharing settings match its audience.
 
 ## Before publishing
 
@@ -86,3 +92,4 @@ Edit `data/site.js` for the club’s SBEngaged and Instagram links, the email li
 - Confirm meeting room/time, event dates and flyers, social links, officer details, and approved photo alt text.
 - Review the Git diff so generated changes are limited to expected pages and no unrelated edits were removed.
 - Do not store private payment details, student records, or contact lists in this public repository.
+- Review form questions periodically and collect only details the club needs. Explain how responses are used and who can access them on the form itself.

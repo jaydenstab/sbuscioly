@@ -4,19 +4,26 @@
 from __future__ import annotations
 
 import argparse
+from datetime import date as calendar_date
 import hashlib
 import html
 import json
 from pathlib import Path
 import re
 import sys
-from urllib.parse import quote_plus
+from urllib.parse import quote_plus, urlsplit
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 
 ROOT = Path(__file__).resolve().parents[1]
 INCLUDES = ROOT / "_includes"
 CLUB_CONFIG = ROOT / "data" / "club.json"
+OFFICERS_SOURCE = ROOT / "data" / "officers.js"
+SITE_SOURCE = ROOT / "data" / "site.js"
+OFFICER_MARKERS = ("<!-- GENERATED OFFICERS START -->", "<!-- GENERATED OFFICERS END -->")
+VOLUNTEER_MARKERS = ("<!-- GENERATED VOLUNTEER UPDATES START -->", "<!-- GENERATED VOLUNTEER UPDATES END -->")
+EVENT_FALLBACK_MARKERS = ("<!-- GENERATED EVENT FALLBACK START -->", "<!-- GENERATED EVENT FALLBACK END -->")
+SCHEDULE_NOTICE_MARKERS = ("<!-- SCHEDULE NOTICE START -->", "<!-- SCHEDULE NOTICE END -->")
 PAGES = {
     "index.html": "home",
     "meetings.html": "meetings",
@@ -85,6 +92,185 @@ def render_config(config: dict) -> str:
     return f'<script type="application/json" id="clubConfig">{safe_json}</script>'
 
 
+def read_assigned_json(path: Path, variable: str, opening: str, closing: str) -> object:
+    expression = re.escape(opening) + r".*?" + re.escape(closing)
+    pattern = re.compile(rf"window\.{re.escape(variable)}\s*=\s*({expression})\s*;", re.S)
+    match = pattern.search(path.read_text(encoding="utf-8"))
+    if not match:
+        raise ValueError(f"Could not read JSON-compatible window.{variable} data from {path.relative_to(ROOT)}")
+    return json.loads(match.group(1))
+
+
+def valid_external_url(value: object) -> bool:
+    if not isinstance(value, str):
+        return False
+    parsed = urlsplit(value)
+    return parsed.scheme == "https" and bool(parsed.netloc)
+
+
+def fill_site_links(page: str, site: dict) -> str:
+    targets = {
+        "sbengagedUrl": ("id", "sbengagedLink"),
+        "instagramUrl": ("id", "instagramLink"),
+        "emailListUrl": ("data-site-link", "email-list"),
+        "futureGbmIdeaUrl": ("data-site-link", "future-gbm-idea"),
+    }
+    for key, (attribute, identifier) in targets.items():
+        value = site.get(key)
+        if not valid_external_url(value):
+            raise ValueError(f"data/site.js must provide an HTTPS {key}")
+        pattern = re.compile(
+            rf'<a\b(?=[^>]*\b{re.escape(attribute)}=["\']{re.escape(identifier)}["\'])[^>]*>',
+            re.I,
+        )
+
+        def replace(match: re.Match[str]) -> str:
+            tag = match.group(0)
+            href = re.compile(r'\bhref=["\'][^"\']*["\']', re.I)
+            replacement = f'href="{html.escape(value, quote=True)}"'
+            if href.search(tag):
+                return href.sub(replacement, tag, count=1)
+            return tag[:-1] + f' {replacement}>'
+
+        page = pattern.sub(replace, page)
+    return page
+
+
+def render_officers(officers: list[dict]) -> str:
+    if not officers:
+        return '<div class="eboard-empty"><p>Officer information will be added when it’s ready.</p></div>'
+
+    cards: list[str] = []
+    for officer in officers:
+        if not isinstance(officer, dict):
+            raise ValueError("Each data/officers.js entry must be an object")
+        raw_name = str(officer.get("name", "Officer")).strip()
+        name = "Vacant" if re.fullmatch(r"(?:vacant|tbd|to be announced)", raw_name, re.I) else raw_name
+        role = str(officer.get("role", "Officer")).strip() or "Officer"
+        if not name:
+            raise ValueError("Officer names must not be empty")
+        photo = officer.get("photo", "")
+        image = ""
+        card_class = "officer-card"
+        if photo:
+            if not isinstance(photo, str) or not photo.startswith("eboard/") or ".." in photo or "?" in photo or "#" in photo or not (ROOT / photo).is_file():
+                raise ValueError(f"Officer photo must be an existing local eboard asset: {photo}")
+            position = str(officer.get("photoPosition", "")).strip()
+            position_match = re.fullmatch(r"(\d{1,3})%\s+(\d{1,3})%", position)
+            style = ""
+            if position_match and all(int(part) <= 100 for part in position_match.groups()):
+                style = f' style="object-position: {position_match.group(1)}% {position_match.group(2)}%"'
+            image = f'<img src="./{html.escape(photo, quote=True)}" alt="{html.escape(name + ", " + role, quote=True)}" loading="lazy" decoding="async">'
+            if style:
+                image = image.replace(' loading="lazy"', style + ' loading="lazy"')
+            card_class += " officer-card--with-photo"
+
+        linkedin = officer.get("linkedin", "")
+        link = ""
+        if name != "Vacant" and valid_external_url(linkedin):
+            host = urlsplit(linkedin).hostname or ""
+            if host == "linkedin.com" or host.endswith(".linkedin.com"):
+                link = f'<a class="officer-social" href="{html.escape(linkedin, quote=True)}" target="_blank" rel="noopener noreferrer" aria-label="Visit {html.escape(name, quote=True)}’s LinkedIn profile">LinkedIn ↗</a>'
+        cards.append(
+            f'<article class="{card_class}">{image}<small class="officer-role">{html.escape(role)}</small>'
+            f'<strong>{html.escape(name)}</strong>{link}</article>'
+        )
+    return "\n".join(cards)
+
+
+def render_volunteer_updates(events: list[dict]) -> str:
+    if not events:
+        return '<p class="timeline-empty">No volunteer dates announced yet.</p>'
+
+    def parsed_date(event: dict) -> calendar_date | None:
+        value = event.get("date")
+        if not isinstance(value, str) or not re.fullmatch(r"\d{4}-\d{2}-\d{2}", value):
+            return None
+        try:
+            return calendar_date.fromisoformat(value)
+        except ValueError:
+            return None
+
+    def order(event: dict) -> tuple[int, int, str]:
+        parsed = parsed_date(event)
+        status = str(event.get("status", "")).strip().lower()
+        if parsed is None:
+            return (2, 0, str(event.get("name", "")))
+        if status in {"canceled", "cancelled", "completed"}:
+            return (1, -parsed.toordinal(), str(event.get("name", "")))
+        return (0, parsed.toordinal(), str(event.get("name", "")))
+
+    for event in events:
+        if not isinstance(event, dict):
+            raise ValueError("Each data/volunteering.js entry must be an object")
+    events = sorted(events, key=order)
+    items: list[str] = []
+    for event in events:
+        name = str(event.get("name", "Volunteer event")).strip() or "Volunteer event"
+        date = parsed_date(event)
+        date_label = "Date to be announced"
+        if date:
+            date_label = date.strftime("%b %d, %Y").replace(" 0", " ")
+        note = str(event.get("note", "")).strip()
+        if not note:
+            note = "Email the club for current participation details."
+        status = str(event.get("status", "")).strip().lower()
+        permanent_status = "Canceled" if status in {"canceled", "cancelled"} else "Completed" if status == "completed" else ""
+        status_html = f'<span class="timeline-status">{permanent_status}</span>' if permanent_status else ""
+        items.append(
+            '<article class="timeline-item"><div class="timeline-top">'
+            f'<small>{html.escape(date_label)}</small>{status_html}</div>'
+            f'<h3>{html.escape(name)}</h3><p>{html.escape(note)}</p></article>'
+        )
+    return "\n".join(items)
+
+
+def render_event_fallback(events: list[dict]) -> str:
+    if not events:
+        return '<p class="event-static-note">No activity dates are posted.</p>'
+
+    def event_date(event: dict) -> calendar_date | None:
+        value = event.get("date")
+        if not isinstance(value, str) or not re.fullmatch(r"\d{4}-\d{2}-\d{2}", value):
+            return None
+        try:
+            return calendar_date.fromisoformat(value)
+        except ValueError:
+            return None
+
+    valid_events = [event for event in events if isinstance(event, dict)]
+    valid_events.sort(key=lambda event: ((event_date(event) or calendar_date.min), str(event.get("startTime", ""))), reverse=True)
+    items: list[str] = []
+    for event in valid_events:
+        date = event_date(event)
+        title = str(event.get("title", "Activity")).strip() or "Activity"
+        if date:
+            date_label = date.strftime("%b %d, %Y").replace(" 0", " ")
+            date_markup = f'<time datetime="{date.isoformat()}">{date_label}</time>'
+        else:
+            date_markup = '<span>Date to be announced</span>'
+        start_time = event.get("startTime")
+        time_label = ""
+        if isinstance(start_time, str) and re.fullmatch(r"(?:[01]\d|2[0-3]):[0-5]\d", start_time):
+            time_label = f' · {display_time(start_time)}'
+        items.append(f'<li>{date_markup}{time_label} — {html.escape(title)}</li>')
+    return (
+        '<p class="event-static-note">Published activity dates are listed below. Check the date before attending.</p>'
+        '<ul class="event-static-list">'
+        + "".join(items)
+        + "</ul>"
+    )
+
+
+def render_schedule_notice(meeting: dict) -> str:
+    notice = meeting.get("scheduleNotice", "")
+    if not isinstance(notice, str):
+        raise ValueError("data/club.json meeting.scheduleNotice must be a string")
+    if not notice.strip():
+        return ""
+    return f'<p class="schedule-change-notice" role="status">{html.escape(notice.strip())}</p>'
+
+
 def fill_field(page: str, name: str, value: str) -> str:
     pattern = re.compile(
         rf'(?P<start><(?P<tag>[A-Za-z][\w:-]*)\b(?=[^>]*\bdata-meeting-field=["\']{re.escape(name)}["\'])[^>]*>).*?(?P<end></(?P=tag)\s*>)',
@@ -131,6 +317,8 @@ def validate_config(config: dict) -> None:
     missing = [key for key in required if not isinstance(meeting.get(key), str) or not meeting[key].strip()]
     if missing:
         raise ValueError(f"data/club.json is missing meeting values: {', '.join(missing)}")
+    if "scheduleNotice" in meeting and not isinstance(meeting["scheduleNotice"], str):
+        raise ValueError("data/club.json meeting.scheduleNotice must be a string")
     time_pattern = re.compile(r"^(?:[01]\d|2[0-3]):[0-5]\d$")
     if not time_pattern.fullmatch(meeting["startTime"]) or not time_pattern.fullmatch(meeting["endTime"]):
         raise ValueError("Meeting startTime and endTime must use 24-hour HH:MM format")
@@ -140,7 +328,7 @@ def validate_config(config: dict) -> None:
         raise ValueError(f"Unknown meeting time zone: {meeting['timeZone']}") from error
 
 
-def render_page(filename: str, current_page: str, config: dict) -> str:
+def render_page(filename: str, current_page: str, config: dict, site: dict, officers: list[dict]) -> str:
     path = ROOT / filename
     html_text = FRONT_MATTER.sub("", path.read_text(encoding="utf-8"))
     header_source = (INCLUDES / "site-header.html").read_text(encoding="utf-8")
@@ -171,6 +359,20 @@ def render_page(filename: str, current_page: str, config: dict) -> str:
             raise ValueError(f"Expected {expected_count} recurring meeting field(s) for {field} in {filename}, found {count}")
     if filename == "meetings.html" and html_text.count('data-meeting-map-link="true"') != 1:
         raise ValueError("Meetings page must include one generated meeting directions link")
+    html_text = fill_site_links(html_text, site)
+    if filename in {"index.html", "meetings.html"}:
+        html_text = replace_marked(html_text, SCHEDULE_NOTICE_MARKERS, render_schedule_notice(config["meeting"]))
+        event_data = read_assigned_json(ROOT / "data" / "events.js", "SCIOLY_EVENTS", "[", "]")
+        if not isinstance(event_data, list):
+            raise ValueError("data/events.js must contain an array")
+        html_text = replace_marked(html_text, EVENT_FALLBACK_MARKERS, render_event_fallback(event_data))
+    if filename == "about.html":
+        html_text = replace_marked(html_text, OFFICER_MARKERS, render_officers(officers))
+    if filename == "volunteer.html":
+        volunteering = read_assigned_json(ROOT / "data" / "volunteering.js", "SCIOLY_VOLUNTEERING", "[", "]")
+        if not isinstance(volunteering, list):
+            raise ValueError("data/volunteering.js must contain an array")
+        html_text = replace_marked(html_text, VOLUNTEER_MARKERS, render_volunteer_updates(volunteering))
     if "{% " in html_text or "{{ " in html_text:
         raise ValueError(f"Unexpanded template syntax remains in {filename}")
     return version_assets(html_text)
@@ -184,8 +386,12 @@ def main() -> int:
     try:
         config = json.loads(CLUB_CONFIG.read_text(encoding="utf-8"))
         validate_config(config)
+        site = read_assigned_json(SITE_SOURCE, "SCIOLY_SITE", "{", "}")
+        officers = read_assigned_json(OFFICERS_SOURCE, "SCIOLY_OFFICERS", "[", "]")
+        if not isinstance(site, dict) or not isinstance(officers, list):
+            raise ValueError("data/site.js must contain an object and data/officers.js an array")
         for filename, current_page in PAGES.items():
-            expected = render_page(filename, current_page, config)
+            expected = render_page(filename, current_page, config, site, officers)
             output_path = ROOT / filename
             if args.check:
                 actual = output_path.read_text(encoding="utf-8")

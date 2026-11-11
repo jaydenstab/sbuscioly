@@ -13,6 +13,24 @@ function makeNode(tag, className, text) {
   return element;
 }
 
+function eventOrder(event, today) {
+  const status = window.SBUVolunteerStatus.statusFor(event, today);
+  if (!window.SBUVolunteerStatus.validISODate(event.date)) return 2;
+  if (status === 'Canceled' || status === 'Completed' || window.SBUVolunteerStatus.isPastDate(event.date, today)) return 1;
+  return 0;
+}
+
+function sortEvents(events, today) {
+  return events.slice().sort((left, right) => {
+    const leftOrder = eventOrder(left, today);
+    const rightOrder = eventOrder(right, today);
+    if (leftOrder !== rightOrder) return leftOrder - rightOrder;
+    if (leftOrder === 2) return 0;
+    const byDate = left.date.localeCompare(right.date);
+    return leftOrder === 0 ? byDate : -byDate;
+  });
+}
+
 function displayDate(value) {
   if (!window.SBUVolunteerStatus?.validISODate(value)) return 'Date to be announced';
   return new Intl.DateTimeFormat('en-US', {
@@ -23,17 +41,13 @@ function displayDate(value) {
 function renderVolunteering() {
   if (!host) return;
   host.replaceChildren();
-  const events = (window.SCIOLY_VOLUNTEERING || []).slice().sort((a, b) => {
-    const left = window.SBUVolunteerStatus?.validISODate(a.date) ? a.date : '9999-99-99';
-    const right = window.SBUVolunteerStatus?.validISODate(b.date) ? b.date : '9999-99-99';
-    return left.localeCompare(right);
-  });
+  const today = window.SBUVolunteerStatus.dateInTimeZone(new Date(), timeZone);
+  const events = sortEvents(window.SCIOLY_VOLUNTEERING || [], today);
   if (!events.length) {
     host.append(makeNode('p', 'timeline-empty', 'No volunteer dates announced yet.'));
     return;
   }
 
-  const today = window.SBUVolunteerStatus.dateInTimeZone(new Date(), timeZone);
   for (const event of events) {
     const dateValid = window.SBUVolunteerStatus.validISODate(event.date);
     const status = window.SBUVolunteerStatus.statusFor(event, today);

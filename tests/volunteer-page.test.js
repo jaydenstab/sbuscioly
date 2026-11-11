@@ -43,3 +43,19 @@ test('empty volunteer data displays a useful message', () => {
   const host = render([]);
   assert.equal(host.children[0].textContent, 'No volunteer dates announced yet.');
 });
+
+test('future opportunities come first, then recent completed or closed events, with undated entries last', () => {
+  const host = render([
+    { id: 'old', name: 'Older recap', date: '2000-01-01', status: 'completed' },
+    { id: 'later', name: 'Later opportunity', date: '2999-10-01', status: 'tentative' },
+    { id: 'undated', name: 'Undated opportunity', status: 'tentative' },
+    { id: 'sooner', name: 'Sooner opportunity', date: '2999-01-01', status: 'confirmed' },
+    { id: 'recent', name: 'Recent recap', date: '2025-01-01', status: 'completed' },
+    { id: 'canceled', name: 'Canceled opportunity', date: '2999-12-01', status: 'canceled' }
+  ]);
+  const names = host.children.map(card => card.children[1].textContent);
+  assert.deepEqual(names, [
+    'Sooner opportunity', 'Later opportunity', 'Canceled opportunity',
+    'Recent recap', 'Older recap', 'Undated opportunity'
+  ]);
+});

@@ -3,6 +3,7 @@ from __future__ import annotations
 from html.parser import HTMLParser
 import json
 from pathlib import Path
+import re
 import subprocess
 import sys
 import unittest
@@ -22,6 +23,7 @@ class PageInventory(HTMLParser):
         self.ids: set[str] = set()
         self.id_counts: dict[str, int] = {}
         self.links: list[str] = []
+        self.links_by_id: dict[str, str] = {}
         self.stack: list[str] = []
         self.nested_interactives: list[tuple[str, str]] = []
 
@@ -34,6 +36,8 @@ class PageInventory(HTMLParser):
         for attribute in ("href", "src"):
             if values.get(attribute):
                 self.links.append(values[attribute] or "")
+        if values.get("id") and values.get("href"):
+            self.links_by_id[values["id"] or ""] = values["href"] or ""
         for attribute in ("srcset", "imagesrcset"):
             for candidate in (values.get(attribute) or "").split(","):
                 if candidate.strip():
@@ -101,9 +105,62 @@ class SiteValidationTests(unittest.TestCase):
 
     def test_event_posters_exist(self) -> None:
         source = (ROOT / "data/events.js").read_text(encoding="utf-8")
-        import re
-        for poster in re.findall(r"poster:\s*'([^']+)'", source):
+        match = re.search(r"window\.SCIOLY_EVENTS\s*=\s*(\[.*?\])\s*;", source, re.S)
+        self.assertIsNotNone(match, "Event source should remain JSON-compatible")
+        for event in json.loads(match.group(1)):
+            poster = event["poster"]
             self.assertTrue((ROOT / poster).is_file(), f"Missing event poster: {poster}")
+
+    def test_home_and_meetings_have_generated_no_script_activity_dates(self) -> None:
+        source = (ROOT / "data/events.js").read_text(encoding="utf-8")
+        match = re.search(r"window\.SCIOLY_EVENTS\s*=\s*(\[.*?\])\s*;", source, re.S)
+        self.assertIsNotNone(match, "Event source should remain JSON-compatible")
+        events = json.loads(match.group(1))
+        for name in ("index.html", "meetings.html"):
+            html = (ROOT / name).read_text(encoding="utf-8")
+            self.assertIn("<noscript>", html)
+            self.assertIn("GENERATED EVENT FALLBACK START", html)
+            self.assertIn("GENERATED EVENT FALLBACK END", html)
+            for event in events:
+                self.assertIn(event["title"], html)
+                self.assertIn(event["date"], html)
+            self.assertNotIn("Check the recurring schedule for meeting details", html)
+
+    def test_officer_names_and_roles_are_in_static_about_output(self) -> None:
+        source = (ROOT / "data/officers.js").read_text(encoding="utf-8")
+        match = re.search(r"window\.SCIOLY_OFFICERS\s*=\s*(\[.*?\])\s*;", source, re.S)
+        self.assertIsNotNone(match, "Officer source should remain JSON-compatible")
+        officers = json.loads(match.group(1))
+        about = (ROOT / "about.html").read_text(encoding="utf-8")
+        for officer in officers:
+            self.assertIn(officer["name"], about)
+            self.assertIn(officer["role"], about)
+        self.assertIn("GENERATED OFFICERS START", about)
+        self.assertIn("GENERATED OFFICERS END", about)
+
+    def test_static_contact_links_match_site_data(self) -> None:
+        source = (ROOT / "data/site.js").read_text(encoding="utf-8")
+        match = re.search(r"window\.SCIOLY_SITE\s*=\s*(\{.*?\})\s*;", source, re.S)
+        self.assertIsNotNone(match, "Site link source should remain JSON-compatible")
+        site = json.loads(match.group(1))
+        about = inventory(ROOT / "about.html")
+        meetings = inventory(ROOT / "meetings.html")
+        self.assertEqual(about.links_by_id["sbengagedLink"], site["sbengagedUrl"])
+        self.assertEqual(about.links_by_id["instagramLink"], site["instagramUrl"])
+        self.assertEqual(meetings.links_by_id["emailListLink"], site["emailListUrl"])
+        self.assertEqual(meetings.links_by_id["futureGbmIdeaLink"], site["futureGbmIdeaUrl"])
+
+    def test_confirmed_volunteer_update_is_available_without_javascript(self) -> None:
+        volunteer = (ROOT / "volunteer.html").read_text(encoding="utf-8")
+        data = (ROOT / "data/volunteering.js").read_text(encoding="utf-8")
+        match = re.search(r"window\.SCIOLY_VOLUNTEERING\s*=\s*(\[.*?\])\s*;", data, re.S)
+        self.assertIsNotNone(match, "Volunteer source should remain JSON-compatible")
+        events = json.loads(match.group(1))
+        for event in events:
+            self.assertIn(event["name"], volunteer)
+            self.assertIn(event["date"][:4], volunteer)
+        self.assertIn("GENERATED VOLUNTEER UPDATES START", volunteer)
+        self.assertIn("GENERATED VOLUNTEER UPDATES END", volunteer)
 
     def test_pages_have_unique_ids_and_no_nested_interactive_controls(self) -> None:
         for name in PAGES:

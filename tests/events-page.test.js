@@ -8,7 +8,7 @@ const { FakeElement, createDocument } = require('./dom-fixture');
 const source = fs.readFileSync(path.join(__dirname, '../events-page.js'), 'utf8');
 const config = { meeting: { day: 'Tuesday', startTime: '19:00', endTime: '20:00', timeZone: 'America/New_York', building: 'Frey Hall', room: '305' } };
 
-function render(events) {
+function render(events, now = new Date()) {
   const host = new FakeElement('section');
   const meetingsHost = new FakeElement('section');
   const configNode = new FakeElement('script');
@@ -26,7 +26,12 @@ function render(events) {
       SBUCalendar: { render(event) { calendarEvent = event; } },
       setInterval() {}
     },
-    Intl, Date, URL
+    Intl,
+    Date: class extends Date {
+      constructor(...args) { super(...(args.length ? args : [now])); }
+      static now() { return now.getTime(); }
+    },
+    URL
   };
   vm.runInNewContext(source, context);
   return { host, meetingsHost, calendarEvent, activityEvidence };
@@ -48,16 +53,25 @@ test('homepage upcoming card renders the next confirmed event and calendar data'
   assert.equal(result.meetingsHost.children[0].children[0].textContent, 'Next Activity');
 });
 
-test('empty upcoming state remains useful and links to the verified social account', () => {
+test('empty upcoming state says no special activity is announced without implying the meeting is canceled', () => {
   const result = render([]);
   assert.equal(result.host.children[0].className, 'next-pending');
-  assert.equal(result.host.children[0].children[0].textContent, 'No upcoming activity announced.');
-  assert.match(result.host.children[0].children[1].textContent, /Instagram for schedule changes/);
-  assert.equal(result.host.children[0].children[2].href, 'https://www.instagram.com/stonybrookscioly/');
-  assert.equal(result.host.children[0].children[2].textContent, 'Follow @stonybrookscioly ↗');
-  assert.equal(result.meetingsHost.children[0].children[0].textContent, 'No upcoming activity announced.');
-  assert.equal(result.meetingsHost.children[0].children[2].href, 'https://www.instagram.com/stonybrookscioly/');
+  assert.equal(result.host.children[0].children[0].textContent, 'No specific activity has been announced.');
+  assert.equal(result.host.children[0].children.length, 1);
+  assert.equal(result.meetingsHost.children[0].children[0].textContent, 'No specific activity has been announced.');
+  assert.equal(result.meetingsHost.children[0].children.length, 1);
   assert.equal(result.calendarEvent, null);
+});
+
+test('an event remains upcoming until its configured end time in the club time zone', () => {
+  const event = { id: 'boundary', title: 'Boundary Activity', date: '2026-11-11', startTime: '19:00', endTime: '20:00', poster: 'posters/event.jpg' };
+  const beforeEnd = render([event], new Date('2026-11-12T00:59:00Z'));
+  assert.equal(beforeEnd.host.children[0].children[0].textContent, 'Boundary Activity');
+
+  const atEnd = render([event], new Date('2026-11-12T01:00:00Z'));
+  assert.equal(atEnd.host.children[0].className, 'next-pending');
+  assert.equal(atEnd.host.children[0].children[0].textContent, 'No specific activity has been announced.');
+  assert.equal(atEnd.activityEvidence.textContent, 'Recent meetings have included Boundary Activity.');
 });
 
 test('homepage activity evidence is derived from past confirmed event data', () => {

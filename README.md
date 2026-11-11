@@ -17,7 +17,7 @@ The site helps new and returning members find the weekly meeting schedule, curre
 
 The site uses static HTML, CSS, vanilla JavaScript, and a small Python build script. It is hosted on GitHub Pages. There is no frontend framework or package manager.
 
-`data/club.json` is the source of truth for recurring meeting information. The builder renders crawlable schedule text, expands `_includes/`, and applies stable content hashes to local CSS and JavaScript. Committed HTML is standalone and works on GitHub Pages without a server-side build step.
+`data/club.json` is the source of truth for recurring meeting information and optional confirmed schedule notices. The builder renders crawlable meeting details, a no-script list of published event dates, officer profiles, and volunteer opportunity details; it also fills static contact-link fallbacks from `data/site.js`, expands `_includes/`, and applies stable content hashes to local CSS and JavaScript. JavaScript updates event and volunteer states using the club time zone. Committed HTML works on GitHub Pages without a server-side build step.
 
 ## Local development
 
@@ -39,7 +39,7 @@ Open <http://127.0.0.1:8000> to preview the site. The first command regenerates 
 | `_includes/` | Shared header and footer templates |
 | `tools/build_site.py` | Static page generation, cache hashes, and stale-output check |
 | `data/club.json` | Recurring meeting configuration |
-| `data/events.js` | Confirmed GBM activities and flyer paths |
+| `data/events.js` | Confirmed GBM activities and flyer paths; `SCIOLY_EVENTS` is JSON-compatible for the static fallback |
 | `data/volunteering.js` | Volunteer dates, verification state, and recap notes |
 | `data/officers.js` | Current officer names and approved profile details |
 | `data/photos.js` | Approved meeting photo gallery entries |

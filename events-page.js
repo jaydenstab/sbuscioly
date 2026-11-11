@@ -70,16 +70,7 @@ function renderUpcoming(event) {
     host.replaceChildren();
     if (!event) {
       const pending = node('div', 'next-pending');
-      const copy = node('p', '', 'Check Instagram for schedule changes.');
-      const site = window.SCIOLY_SITE || {};
-      pending.append(node('h3', '', 'No upcoming activity announced.'), copy);
-      if (site.instagramUrl) {
-        const link = node('a', 'empty-state-link', `Follow ${site.instagramLabel || 'SBU SciOly'} ↗`);
-        link.href = site.instagramUrl;
-        link.target = '_blank';
-        link.rel = 'noopener noreferrer';
-        pending.append(link);
-      }
+      pending.append(node('h3', '', 'No specific activity has been announced.'));
       host.append(pending);
       continue;
     }
