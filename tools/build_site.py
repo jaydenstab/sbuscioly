@@ -191,14 +191,17 @@ def render_volunteer_updates(events: list[dict]) -> str:
         except ValueError:
             return None
 
+    # Date-independent ordering also used by volunteer-page.js: dated open/unknown
+    # entries ascending, completed/canceled entries descending, invalid dates last.
     def order(event: dict) -> tuple[int, int, str]:
         parsed = parsed_date(event)
         status = str(event.get("status", "")).strip().lower()
+        identifier = str(event.get("id", "")) or str(event.get("name", ""))
         if parsed is None:
-            return (2, 0, str(event.get("name", "")))
+            return (2, 0, identifier)
         if status in {"canceled", "cancelled", "completed"}:
-            return (1, -parsed.toordinal(), str(event.get("name", "")))
-        return (0, parsed.toordinal(), str(event.get("name", "")))
+            return (1, -parsed.toordinal(), identifier)
+        return (0, parsed.toordinal(), identifier)
 
     for event in events:
         if not isinstance(event, dict):

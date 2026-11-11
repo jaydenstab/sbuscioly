@@ -96,11 +96,11 @@ class BuildSiteTests(unittest.TestCase):
 
     def test_static_volunteer_fallback_orders_future_opportunities_and_labels_explicit_closures(self) -> None:
         markup = BUILD.render_volunteer_updates([
-            {"name": "Old recap", "date": "2024-02-01", "status": "completed"},
-            {"name": "Later opportunity", "date": "2027-03-01", "status": "confirmed"},
-            {"name": "Sooner opportunity", "date": "2027-01-01", "status": "confirmed"},
-            {"name": "Canceled", "date": "2028-01-01", "status": "canceled"},
-            {"name": "Undated", "date": "2027-02-30", "status": "tentative"},
+            {"id": "old", "name": "Old recap", "date": "2024-02-01", "status": "completed"},
+            {"id": "later", "name": "Later opportunity", "date": "2027-03-01", "status": "confirmed"},
+            {"id": "sooner", "name": "Sooner opportunity", "date": "2027-01-01", "status": "confirmed"},
+            {"id": "canceled", "name": "Canceled", "date": "2028-01-01", "status": "canceled"},
+            {"id": "undated", "name": "Undated", "date": "2027-02-30", "status": "tentative"},
         ])
         names = re.findall(r"<h3>(.*?)</h3>", markup)
         self.assertEqual(names, ["Sooner opportunity", "Later opportunity", "Canceled", "Old recap", "Undated"])
@@ -120,6 +120,14 @@ class BuildSiteTests(unittest.TestCase):
             after = BUILD.render_volunteer_updates(events)
         self.assertEqual(before, after)
 
+    def test_volunteer_fallback_uses_ids_for_deterministic_invalid_date_order(self) -> None:
+        markup = BUILD.render_volunteer_updates([
+            {"id": "invalid-z", "name": "Invalid later", "date": "2026-02-30", "status": "tentative"},
+            {"id": "invalid-a", "name": "Invalid earlier", "date": "not-a-date", "status": "tentative"},
+        ])
+        names = re.findall(r"<h3>(.*?)</h3>", markup)
+        self.assertEqual(names, ["Invalid earlier", "Invalid later"])
+
     def test_static_event_fallback_includes_published_titles_and_dates(self) -> None:
         data = BUILD.read_assigned_json(ROOT / "data/events.js", "SCIOLY_EVENTS", "[", "]")
         fallback = BUILD.render_event_fallback(data)
@@ -127,6 +135,21 @@ class BuildSiteTests(unittest.TestCase):
         for event in data:
             self.assertIn(event["title"], fallback)
             self.assertIn(event["date"], fallback)
+
+    def test_static_event_fallback_empty_and_populated_copy_never_claims_a_meeting_is_canceled(self) -> None:
+        empty = BUILD.render_event_fallback([])
+        self.assertIn("No activity dates are posted", empty)
+        self.assertNotIn("canceled", empty.lower())
+
+        populated = BUILD.render_event_fallback([
+            {"id": "future", "title": "Future topic", "date": "2999-01-01", "startTime": "19:00"},
+            {"id": "past", "title": "Past topic", "date": "2020-01-01", "startTime": "19:00"},
+        ])
+        self.assertIn("Published activity dates are listed below", populated)
+        self.assertIn("Future topic", populated)
+        self.assertIn("Past topic", populated)
+        self.assertNotIn("No specific activity has been announced", populated)
+        self.assertNotIn("canceled", populated.lower())
 
     def test_confirmed_schedule_notice_is_optional_and_escaped(self) -> None:
         self.assertEqual(BUILD.render_schedule_notice({"scheduleNotice": ""}), "")

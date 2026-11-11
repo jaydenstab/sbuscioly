@@ -51,7 +51,9 @@ Edit the JSON-compatible array in `data/volunteering.js`:
 
 After a confirmed event date passes, the page says **Recap pending** until the entry is changed to `completed` and the note records a factual recap. Dates must be valid ISO dates. Entries with missing or invalid dates are shown safely as undated and are not treated as past events.
 
-Rebuild after editing. The builder includes the latest opportunity names, dates, and notes in the static page as a no-JavaScript fallback; the page script adds current date-based statuses and reorders entries in the configured time zone.
+The static page and JavaScript use the same date-independent display order: dated entries that are not explicitly completed or canceled appear by date ascending; completed and canceled entries follow by date descending; invalid or missing dates appear last, ordered by ID (or name when no ID is supplied). A past confirmed entry may display **Recap pending**, but its position does not change when JavaScript loads.
+
+Rebuild after editing. The builder includes the latest opportunity names, dates, and notes in the static page as a no-JavaScript fallback; the page script adds current date-based statuses in the configured time zone while preserving the shared static order.
 
 ## Meeting photos
 

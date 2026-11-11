@@ -126,6 +126,13 @@ class SiteValidationTests(unittest.TestCase):
                 self.assertIn(event["date"], html)
             self.assertNotIn("Check the recurring schedule for meeting details", html)
 
+    def test_no_script_activity_fallback_is_not_preceded_by_an_empty_state_claim(self) -> None:
+        for name in ("index.html", "meetings.html"):
+            html = (ROOT / name).read_text(encoding="utf-8")
+            before_fallback = html.split("<!-- GENERATED EVENT FALLBACK START -->", 1)[0]
+            self.assertNotIn("No specific activity has been announced", before_fallback)
+            self.assertIn("Published activity dates are listed below", html)
+
     def test_officer_names_and_roles_are_in_static_about_output(self) -> None:
         source = (ROOT / "data/officers.js").read_text(encoding="utf-8")
         match = re.search(r"window\.SCIOLY_OFFICERS\s*=\s*(\[.*?\])\s*;", source, re.S)

@@ -59,3 +59,21 @@ test('future opportunities come first, then recent completed or closed events, w
     'Recent recap', 'Older recap', 'Undated opportunity'
   ]);
 });
+
+test('date-independent ordering matches the static policy even when a confirmed date is past', () => {
+  const host = render([
+    { id: 'old-confirmed', name: 'Past confirmed date', date: '2020-01-01', status: 'confirmed' },
+    { id: 'later', name: 'Later opportunity', date: '2027-03-01', status: 'confirmed' },
+    { id: 'sooner', name: 'Sooner opportunity', date: '2027-01-01', status: 'tentative' },
+    { id: 'canceled', name: 'Canceled opportunity', date: '2028-01-01', status: 'canceled' },
+    { id: 'completed', name: 'Completed opportunity', date: '2026-02-01', status: 'completed' },
+    { id: 'invalid-z', name: 'Invalid later', date: '2026-02-30', status: 'tentative' },
+    { id: 'invalid-a', name: 'Invalid earlier', date: 'not-a-date', status: 'tentative' }
+  ]);
+  const names = host.children.map(card => card.children[1].textContent);
+  assert.deepEqual(names, [
+    'Past confirmed date', 'Sooner opportunity', 'Later opportunity',
+    'Canceled opportunity', 'Completed opportunity', 'Invalid earlier', 'Invalid later'
+  ]);
+  assert.equal(host.children[0].children[0].children[1].textContent, 'Recap pending');
+});

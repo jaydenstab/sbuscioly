@@ -108,8 +108,6 @@ a:focus-visible, button:focus-visible { outline: 3px solid var(--focus-ring); ou
 .prisma-hero__cta:hover > span { transform: translateX(3px); }
 .prisma-hero__cta:focus-visible { outline-color: #fff; }
 .prisma-hero a:focus-visible, .prisma-nav a:focus-visible, .prisma-nav button:focus-visible { outline-color: #fff; }
-.prisma-hero__secondary { display: inline-block; margin: 14px 0 0 12px; color: #fff; font-size: 13px; font-weight: 600; text-decoration: underline; text-decoration-color: #ffffff90; text-underline-offset: 4px; }
-.prisma-hero__secondary:hover { text-decoration-color: currentColor; }
 
 .home-activities { background: var(--wash); border-block: 1px solid var(--line); }
 .home-activities__layout { display: grid; grid-template-columns: .8fr 1.2fr; align-items: start; gap: 32px; }
@@ -165,7 +163,7 @@ h2 em { color: var(--red); font-style: italic; }
 .next-pending h3 { margin: 0 0 10px; font-family: Georgia, "Times New Roman", serif; font-size: clamp(26px, 3vw, 36px); line-height: 1.14; font-weight: 500; }
 .next-pending p { max-width: 480px; color: var(--muted); }
 .next-event:has(.next-pending) { color: var(--ink); background: var(--wash); border-color: var(--line); }
-.next-event:has(.next-pending) { min-height: 160px; }
+.next-event:has(.next-pending) { min-height: 160px; align-self: start; }
 .next-event:has(.next-pending) .next-pending { padding: clamp(24px, 4vw, 38px); background: var(--wash); }
 .missing-poster { padding: 22px; color: var(--red-dark); text-align: center; font-size: 14px; }
 #gbm-calendar-actions { display: flex; flex-wrap: wrap; align-items: center; gap: .65rem; margin-top: 1.25rem; }
@@ -318,7 +316,6 @@ h2 em { color: var(--red); font-style: italic; }
   .prisma-hero__support { max-width: 440px; }
   .prisma-photo-credit { bottom: 12px; left: 18px; max-width: calc(100% - 36px); font-size: 12px; }
   .prisma-hero__cta { margin-top: 16px; }
-  .prisma-hero__secondary { margin-left: 8px; }
   .meeting-grid, .next-event, .photo-grid, .volunteer-layout, .about-layout, .contact-layout { grid-template-columns: 1fr; }
   .next-poster { min-height: 240px; max-height: 380px; }
   .next-poster img { max-height: 340px; }
@@ -340,8 +337,8 @@ h2 em { color: var(--red); font-style: italic; }
   .dialog-bar, .dialog-bottom { padding: 12px; }
 }
 @media (max-width: 360px) {
+  .prisma-hero__content { padding-bottom: 82px; }
   .prisma-hero__title { font-size: 84px; letter-spacing: -.04em; }
-  .prisma-hero__secondary { display: block; margin: 12px 0 0; }
 }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }

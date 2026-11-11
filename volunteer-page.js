@@ -13,21 +13,25 @@ function makeNode(tag, className, text) {
   return element;
 }
 
-function eventOrder(event, today) {
-  const status = window.SBUVolunteerStatus.statusFor(event, today);
+/* Keep this date-independent policy aligned with tools/build_site.py:
+   dated open/unknown entries by ascending date, closed entries by descending date, undated last. */
+function eventOrder(event) {
   if (!window.SBUVolunteerStatus.validISODate(event.date)) return 2;
-  if (status === 'Canceled' || status === 'Completed' || window.SBUVolunteerStatus.isPastDate(event.date, today)) return 1;
-  return 0;
+  const status = String(event.status || '').trim().toLowerCase();
+  return status === 'canceled' || status === 'cancelled' || status === 'completed' ? 1 : 0;
 }
 
-function sortEvents(events, today) {
+function sortEvents(events) {
   return events.slice().sort((left, right) => {
-    const leftOrder = eventOrder(left, today);
-    const rightOrder = eventOrder(right, today);
+    const leftOrder = eventOrder(left);
+    const rightOrder = eventOrder(right);
     if (leftOrder !== rightOrder) return leftOrder - rightOrder;
-    if (leftOrder === 2) return 0;
+    const leftKey = String(left.id || left.name || '');
+    const rightKey = String(right.id || right.name || '');
+    if (leftOrder === 2) return leftKey < rightKey ? -1 : leftKey > rightKey ? 1 : 0;
     const byDate = left.date.localeCompare(right.date);
-    return leftOrder === 0 ? byDate : -byDate;
+    if (byDate) return leftOrder === 0 ? byDate : -byDate;
+    return leftKey < rightKey ? -1 : leftKey > rightKey ? 1 : 0;
   });
 }
 
@@ -42,7 +46,7 @@ function renderVolunteering() {
   if (!host) return;
   host.replaceChildren();
   const today = window.SBUVolunteerStatus.dateInTimeZone(new Date(), timeZone);
-  const events = sortEvents(window.SCIOLY_VOLUNTEERING || [], today);
+  const events = sortEvents(window.SCIOLY_VOLUNTEERING || []);
   if (!events.length) {
     host.append(makeNode('p', 'timeline-empty', 'No volunteer dates announced yet.'));
     return;
